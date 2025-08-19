@@ -1,0 +1,34 @@
+cmake_minimum_required(VERSION 4.0)
+project(grpfc)
+
+set(CMAKE_CXX_STANDARD 20)
+
+find_package(gnuplot REQUIRED)
+message("Gnuplot found. Compile with Gnuplot support")
+
+add_library(grpfc SHARED
+    src/regular.cpp
+    src/regular.h
+    src/initial_mesh.cpp
+    src/initial_mesh.h
+    src/triangulation.cpp
+    src/triangulation.h
+    src/phase_grad.cpp
+    src/phase_grad.h
+    src/adaptive_mesh.cpp
+    src/adaptive_mesh.h
+    src/cauchy.cpp
+    src/cauchy.h
+    src/utils.h
+    include/params.h
+    unittest/test_init_mesh.cpp)
+
+add_executable(main src/main.cpp
+    src/utils.h)
+target_link_libraries(main grpfc)
+
+# Building examples
+add_executable(example_rational_function
+    examples/rational_function/analysis_setup.cpp
+    include/gnuplot.h)
+target_link_libraries(example_rational_function grpfc)
