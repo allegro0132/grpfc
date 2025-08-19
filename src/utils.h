@@ -10,6 +10,7 @@
 #include <numeric>
 #include <complex>
 #include <fstream>
+#include <Eigen/Dense>
 #include "../include/gnuplot.h"
 
 class PlotUtils {
@@ -75,8 +76,7 @@ public:
 };
 
 namespace grpfc {
-
-	template <typename T>
+	template<typename T>
 	std::vector<T> linspace(T start, T end, int num_points) {
 		std::vector<T> result(num_points);
 		if (num_points == 0) {
@@ -92,6 +92,27 @@ namespace grpfc {
 			result[i] = start + i * increment;
 		}
 		return result;
+	}
+
+	// Function to simulate meshgrid
+	inline void meshgrid(const Eigen::ArrayXd& x_vals, const Eigen::ArrayXd& y_vals,
+	                     Eigen::MatrixXd& X, Eigen::MatrixXd& Y) {
+		long int num_x = x_vals.size();
+		long int num_y = y_vals.size();
+
+		// Initialize X and Y arrays with appropriate dimensions
+		X.resize(num_y, num_x);
+		Y.resize(num_y, num_x);
+
+		// Populate X: each row is a copy of x_vals
+		for (int i = 0; i < num_y; ++i) {
+			X.row(i) = x_vals.transpose();
+		}
+
+		// Populate Y: each column is a copy of y_vals
+		for (int j = 0; j < num_x; ++j) {
+			Y.col(j) = y_vals;
+		}
 	}
 }
 #endif //GRPFC_UTILS_H

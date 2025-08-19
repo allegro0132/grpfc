@@ -3,8 +3,9 @@ project(grpfc)
 
 set(CMAKE_CXX_STANDARD 20)
 
-find_package(gnuplot REQUIRED)
-message("Gnuplot found. Compile with Gnuplot support")
+include_directories(eigen)
+
+add_subdirectory(CDT/CDT CDT)
 
 add_library(grpfc SHARED
     src/regular.cpp
@@ -32,3 +33,7 @@ add_executable(example_rational_function
     examples/rational_function/analysis_setup.cpp
     include/gnuplot.h)
 target_link_libraries(example_rational_function grpfc)
+
+# Building unit tests
+add_executable(test_init_mesh unittest/test_init_mesh.cpp)
+target_link_libraries(test_init_mesh grpfc)

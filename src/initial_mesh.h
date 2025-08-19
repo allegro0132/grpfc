@@ -5,11 +5,12 @@
 #ifndef GRPFC_INITIAL_MESH_H
 #define GRPFC_INITIAL_MESH_H
 #include <vector>
+#include <Eigen/Dense>
 
 // Generates the initial mesh for a rectangular domain
-std::vector<std::vector<double>> rect_dom(double xb, double xe, double yb, double ye);
+Eigen::MatrixXd rect_dom(double xb, double xe, double yb, double ye);
 
 // Generative the initial mesh for a disk domain
-std::vector<std::vector<double>> disk_dom(double radius, int num_points);
+Eigen::MatrixXd disk_dom(double radius, int num_points);
 
 #endif //GRPFC_INITIAL_MESH_H

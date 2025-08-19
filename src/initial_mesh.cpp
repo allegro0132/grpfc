@@ -4,53 +4,48 @@
 
 #include "initial_mesh.h"
 #include "utils.h"
-#include <vector>
 #include <cmath>
-#include <algorithm>
 
-std::vector<std::vector<double>> rect_dom(double xb, double xe, double yb, double ye) {
+
+Eigen::MatrixXd rect_dom(double xb, double xe, double yb, double ye) {
     double X = xe - xb;
     double Y = ye - yb;
     int n = 2;
-    std::vector<std::vector<double>> NodesCoord;
+    Eigen::MatrixXd NodesCoord;
 
     if (X == Y) {
-        NodesCoord = {
-            {xb, yb},
-            {xe, yb},
-            {xe, ye},
-            {xb, ye}
-        };
+        NodesCoord.resize(4, 2);
+        NodesCoord << xb, yb,
+                      xe, yb,
+                      xe, ye,
+                      xb, ye;
+        return NodesCoord;
     } else if (X >= Y) {
         double r = Y / (n - 1);
         double dy = Y / (n - 1);
         int m = std::ceil(X / std::sqrt(r * r - dy * dy / 4) + 1);
         double dx = X / (m - 1);
 
-        std::vector<double> vx = grpfc::linspace(xb, xe, m);
-        std::vector<double> vy = grpfc::linspace(yb, ye, n);
+        Eigen::VectorXd vx = Eigen::VectorXd::LinSpaced(m, xb, xe);
+        Eigen::VectorXd vy = Eigen::VectorXd::LinSpaced(m, yb, ye);
         // meshgrid
-        std::vector<double> x, y;
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < m; ++j) {
-                x.push_back(vx[j]);
-                y.push_back(vy[i]);
-            }
-        }
+        Eigen::MatrixXd x(n, m), y(n, m);
+        grpfc::meshgrid(vx, vy, x, y);
         // temp vector
-        std::vector<double> temp(n, 1.0);
-        temp[n-1] = 0.0;
+        Eigen::VectorXd temp = Eigen::VectorXd::Ones(n);
+        temp(n-1) = 0.0;
         // y adjustment
         for (int j = 0; j < m; ++j) {
-            double shift = 0.5 * dy * ((1 + std::pow(-1, j + 1)) / 2);
-            for (int i = 0; i < n; ++i) {
-                y[j*n + i] += shift * temp[i];
+            if (j % 2 == 1) {
+                // odd column
+                y.col(j) += 0.5 * dy * temp;
             }
         }
         // reshape
-        // already in x, y
+        Eigen::VectorXd x_flat = Eigen::Map<Eigen::VectorXd>(x.data(), x.size());
+        Eigen::VectorXd y_flat = Eigen::Map<Eigen::VectorXd>(y.data(), y.size());
         // tx, ty for extra points
-        std::vector<double> tx, ty;
+        std::vector<double> tx;
         if (m % 2 == 1) {
             for (int k = 2; k <= m; k += 2) {
                 tx.push_back((k - 1) * dx + xb);
@@ -61,16 +56,15 @@ std::vector<std::vector<double>> rect_dom(double xb, double xe, double yb, doubl
             }
             tx.push_back(xe);
         }
-        ty.assign(tx.size(), yb);
+        Eigen::VectorXd _tx = Eigen::Map<Eigen::VectorXd>(tx.data(), tx.size());
+        Eigen::VectorXd ty = Eigen::VectorXd::Constant(tx.size(), yb);
         // append extra points
-        for (size_t i = 0; i < tx.size(); ++i) {
-            x.push_back(tx[i]);
-            y.push_back(ty[i]);
-        }
-        // combine x, y
-        for (size_t i = 0; i < x.size(); ++i) {
-            NodesCoord.push_back({x[i], y[i]});
-        }
+        int total_points = x_flat.size() + tx.size();
+        NodesCoord.resize(total_points, 2);
+        NodesCoord.block(0, 0, x_flat.size(), 1) = x_flat;
+        NodesCoord.block(0, 1, y_flat.size(), 1) = y_flat;
+        NodesCoord.block(x_flat.size(), 0, tx.size(), 1) = _tx;
+        NodesCoord.block(x_flat.size(), 1, ty.size(), 1) = ty;
     } else {
         int m = n;
         double r = X / (m - 1);
@@ -78,28 +72,28 @@ std::vector<std::vector<double>> rect_dom(double xb, double xe, double yb, doubl
         n = std::ceil(Y / std::sqrt(r * r - dx * dx / 4) + 1);
         double dy = Y / (n - 1);
 
-        std::vector<double> vx = grpfc::linspace(xb, xe, m);
-        std::vector<double> vy = grpfc::linspace(yb, ye, n);
+        Eigen::VectorXd vx = Eigen::VectorXd::LinSpaced(m, xb, xe);
+        Eigen::VectorXd vy = Eigen::VectorXd::LinSpaced(m, yb, ye);
+
         // meshgrid
-        std::vector<double> x, y;
-        for (int i = 0; i < n; ++i) {
-            for (int j = 0; j < m; ++j) {
-                x.push_back(vx[j]);
-                y.push_back(vy[i]);
-            }
-        }
+        Eigen::MatrixXd x(n, m), y(n, m);
+        grpfc::meshgrid(vx, vy, x, y);
         // temp vector
-        std::vector<double> temp(m, 1.0);
-        temp[m-1] = 0.0;
+        Eigen::VectorXd temp = Eigen::VectorXd::Ones(m);
+        temp(m-1) = 0.0;
         // x adjustment
         for (int i = 0; i < n; ++i) {
-            double shift = 0.5 * dx * ((1 + std::pow(-1, i + 1)) / 2);
-            for (int j = 0; j < m; ++j) {
-                x[i*m + j] += shift * temp[j];
+            if (i % 2 == 1) {
+                // odd row
+                x.row(i) += 0.5 * dx * temp;
             }
         }
+
+        // reshape
+        Eigen::VectorXd x_flat = Eigen::Map<Eigen::VectorXd>(x.data(), x.size());
+        Eigen::VectorXd y_flat = Eigen::Map<Eigen::VectorXd>(y.data(), y.size());
         // tx, ty for extra points
-        std::vector<double> ty, tx;
+        std::vector<double> ty;
         if (n % 2 == 1) {
             for (int k = 2; k <= n; k += 2) {
                 ty.push_back((k - 1) * dy + yb);
@@ -110,16 +104,15 @@ std::vector<std::vector<double>> rect_dom(double xb, double xe, double yb, doubl
             }
             ty.push_back(ye);
         }
-        tx.assign(ty.size(), xb);
+        Eigen::VectorXd tx = Eigen::VectorXd::Constant(ty.size(), xb);
+        Eigen::VectorXd _ty = Eigen::Map<Eigen::VectorXd>(ty.data(), ty.size());
         // append extra points
-        for (size_t i = 0; i < tx.size(); ++i) {
-            x.push_back(tx[i]);
-            y.push_back(ty[i]);
-        }
-        // combine x, y
-        for (size_t i = 0; i < x.size(); ++i) {
-            NodesCoord.push_back({x[i], y[i]});
-        }
+        int total_points = x_flat.size() + ty.size();
+        NodesCoord.resize(total_points, 2);
+        NodesCoord.block(0, 0, x_flat.size(), 1) = x_flat;
+        NodesCoord.block(0, 1, y_flat.size(), 1) = y_flat;
+        NodesCoord.block(x_flat.size(), 0, tx.size(), 1) = tx;
+        NodesCoord.block(x_flat.size(), 1, ty.size(), 1) = _ty;
     }
     return NodesCoord;
 }

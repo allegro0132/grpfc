@@ -1,0 +1,6 @@
+[submodule "eigen"]
+	path = eigen
+	url = https://gitlab.com/libeigen/eigen.git
+[submodule "CDT"]
+	path = CDT
+	url = git@github.com:artem-ogre/CDT.git
