@@ -6,38 +6,39 @@
 #include "Eigen/dense"
 #include "CDT.h"
 #include "initial_mesh.h"
-#include  "utils.h"
+#include "utils.h"
 #include "params.h"
 // #include "adaptive.h"
 // #include "analyse_gradients.h"
 // #include "analyse_regions.h"
-// #include "regular.h" // To be implemented
+#include "regular.h"
 // #include "rect_dom.h" // To be implemented
 // #include "fun.h" // To be implemented
 // #include "vinq.h" // To be implemented
 // #include "vis.h" // To be implemented
 
 #include "phase_grad.h"
+#include "regular.h"
 #include "triangulation.h"
 #include "../examples/rational_function/analysis_setup.cpp"
 
 
 int main() {
 	// Initialization parameters
-	int Mode = 1; // 0: Adaptive, 1: Regular, 2: Aborted, 3: Accuracy achieved
+	int mode = 1; // 0: Adaptive, 1: Regular, 2: Aborted, 3: Accuracy achieved
 	int ItMax = 1; // Example value, set as needed
 	int NodesMin = 10; // Example value
 	int NodesMax = 1000; // Example value
 	double Tol = 1e-6; // Example value
 	double xb = -0.01;
-	double xe = 1.0;
+	double xe = 0.01;
 	double yb = -100.0;
 	double ye = 1.0; // Domain bounds, set as needed
 	// Optional parameters for fun()
 	double epsilon = 0.01;
 
 	// set up the analysis parameters
-	AnalysisParams params{xb, xe, yb, ye, Tol, NodesMin, NodesMax, ItMax, Mode};
+	AnalysisParams params{xb, xe, yb, ye, Tol, NodesMin, NodesMax, ItMax, mode};
 
 	// initialize the variables
 	int it = 0;
@@ -69,9 +70,10 @@ int main() {
 		nofNodes = nodesCoord.rows();
 		// Meshing operation
 		std::cout << "Triangulation and analysis of: " << nofNodes << " nodes" << std::endl;
+		auto nodesCDT = grpfc::convertToCDTPoints(nodesCoord);
 		CDT::TriangleVec elements;
 		CDT::EdgeUSet edges;
-		grpfc::triangulate(nodesCoord, elements, edges);
+		grpfc::triangulate(nodesCDT, elements, edges);
 
 		// for (auto e: elements) {
 		// 	std::cout << e.vertices[0] << " " << e.vertices[1] << " " << e.vertices[2] << std::endl;
@@ -88,7 +90,7 @@ int main() {
 		CDT::EdgeUSet candidateEdges;
 		grpfc::phaseAnalyze(edges, quadrants, phasesDiff, candidateEdges);
 
-		if (Mode == 0) {
+		if (mode == 0) {
 			// Self-adaptive Mesh Generator Mode
 			// adaptive(...);
 			// PreviousIt.EdgesToSplit = ...;
@@ -104,9 +106,11 @@ int main() {
 			//     std::cout << "The mode has been switched to the regular GRPF" << std::endl;
 			// }
 		}
-		if (Mode == 1) {
+		if (mode == 1) {
 			// Regular Global complex Roots and Poles Finding algorithm
-			// regular(...);
+			std::cout << "Begin: " << candidateEdges.size() << std::endl;
+			grpfc::regularGRPF(nodesCoord, params.Tol, elements, candidateEdges, mode);
+			std::cout << "End: " << candidateEdges.size() << std::endl;
 		}
 
 		// Split the edge in half (to be implemented)
@@ -118,10 +122,10 @@ int main() {
 	}
 
 	// Final analysis
-	if (Mode == 2) {
+	if (mode == 2) {
 		std::cout << "Finish after: " << it << " iteration" << std::endl;
 	}
-	if (Mode == 3) {
+	if (mode == 3) {
 		std::cout << "Assumed accuracy is achieved in iteration: " << it << std::endl;
 	}
 

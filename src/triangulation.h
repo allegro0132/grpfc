@@ -8,6 +8,9 @@
 #include "utils.h"
 
 namespace grpfc {
-	int triangulate(const Eigen::ArrayX2d& nodesCoord, CDT::TriangleVec& elements, CDT::EdgeUSet& edges);
+	int triangulate(const std::vector<CDT::V2d<double>>& nodesCDT, CDT::TriangleVec& elements, CDT::EdgeUSet& edges);
+
+	CDT::EdgeUSet find_skinny_elements(const CDT::TriangleVec& elements, const Eigen::ArrayX2d& nodesCoord,
+	                                   double skinRatio);
 }
 #endif //GRPFC_TRIANGULATION_H

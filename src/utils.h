@@ -138,5 +138,17 @@ namespace grpfc {
 		}
 		return cdt_points;
 	}
+
+	inline std::vector<int> vertexAttachment(CDT::VertInd vertInd, CDT::TriangleVec elements) {
+		std::vector<int> indTriangles;
+		for (int i=1; i < elements.size(); ++i) {
+			// check if any vertex of the triangle is in the candidate
+			auto tri = elements[i];
+			if (std::find(tri.vertices.begin(), tri.vertices.end(), vertInd) != tri.vertices.end()) {
+				indTriangles.push_back(i); // Get index of triangle
+			}
+		}
+		return indTriangles;
+	}
 }
 #endif //GRPFC_UTILS_H
