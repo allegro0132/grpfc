@@ -25,9 +25,8 @@ Eigen::MatrixXd rect_dom(double xb, double xe, double yb, double ye) {
         double dy = Y / (n - 1);
         int m = std::ceil(X / std::sqrt(r * r - dy * dy / 4) + 1);
         double dx = X / (m - 1);
-
         Eigen::VectorXd vx = Eigen::VectorXd::LinSpaced(m, xb, xe);
-        Eigen::VectorXd vy = Eigen::VectorXd::LinSpaced(m, yb, ye);
+        Eigen::VectorXd vy = Eigen::VectorXd::LinSpaced(n, yb, ye);
         // meshgrid
         Eigen::MatrixXd x(n, m), y(n, m);
         grpfc::meshgrid(vx, vy, x, y);
@@ -73,7 +72,7 @@ Eigen::MatrixXd rect_dom(double xb, double xe, double yb, double ye) {
         double dy = Y / (n - 1);
 
         Eigen::VectorXd vx = Eigen::VectorXd::LinSpaced(m, xb, xe);
-        Eigen::VectorXd vy = Eigen::VectorXd::LinSpaced(m, yb, ye);
+        Eigen::VectorXd vy = Eigen::VectorXd::LinSpaced(n, yb, ye);
 
         // meshgrid
         Eigen::MatrixXd x(n, m), y(n, m);

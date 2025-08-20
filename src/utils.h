@@ -11,6 +11,7 @@
 #include <complex>
 #include <fstream>
 #include <Eigen/Dense>
+#include "CDT.h"
 #include "../include/gnuplot.h"
 
 class PlotUtils {
@@ -113,6 +114,29 @@ namespace grpfc {
 		for (int j = 0; j < num_x; ++j) {
 			Y.col(j) = y_vals;
 		}
+	}
+
+	inline int vinq(const std::complex<double>& f) {
+		double re = std::real(f);
+		double im = std::imag(f);
+		if (re > 0 && im >= 0)
+			return 1;
+		else if (re <= 0 && im > 0)
+			return 2;
+		else if (re < 0 && im <= 0)
+			return 3;
+		else if (re >= 0 && im < 0)
+			return 4;
+		else
+			return -1; // NaN equivalent for int
+	}
+
+	inline std::vector<CDT::V2d<double>> convertToCDTPoints(const Eigen::ArrayX2d& points) {
+		std::vector<CDT::V2d<double>> cdt_points;
+		for (int i = 0; i < points.rows(); ++i) {
+			cdt_points.emplace_back(points(i, 0), points(i, 1));
+		}
+		return cdt_points;
 	}
 }
 #endif //GRPFC_UTILS_H

@@ -6,6 +6,7 @@ set(CMAKE_CXX_STANDARD 20)
 include_directories(eigen)
 
 add_subdirectory(CDT/CDT CDT)
+include_directories(CDT/CDT/include)
 
 add_library(grpfc SHARED
     src/regular.cpp
@@ -21,8 +22,9 @@ add_library(grpfc SHARED
     src/cauchy.cpp
     src/cauchy.h
     src/utils.h
-    include/params.h
-    unittest/test_init_mesh.cpp)
+    src/params.h
+    unittest/test_init_mesh.cpp
+)
 
 add_executable(main src/main.cpp
     src/utils.h)

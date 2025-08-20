@@ -7,7 +7,7 @@
 #include <vector>
 #include <cmath>
 #include "../../src/utils.h"
-#include "../../include/params.h"
+#include "../../src/params.h"
 
 // Example rational function
 inline std::complex<double> fun(const std::complex<double> z, const double epsilon) {
@@ -20,22 +20,22 @@ inline std::complex<double> fun(const std::complex<double> z, const double epsil
 	return w;
 }
 
-int main() {
+int _main() {
 	// test the rational function
-	std::complex<double> z_in = std::complex<double>(0.1, 0.2);
+	std::complex<double> z_in = std::complex<double>(-1, -1);
 	double epsilon = 0.01;
 	std::complex<double> result = fun(z_in, epsilon);
 	std::cout << "Result of the rational function: " << result << std::endl;
 
 	// set up the analysis parameters
-	analysisParams params{-1.0, 1.0, -1.0, 1.0, 1e-6, 10, 1000, 50000, 1};
+	AnalysisParams params{-1.0, 1.0, -1.0, 1.0, 1e-6, 10, 1000, 50000, 1};
 
   // generate the initial mesh
 
 
 	// Example usage of plot fun and visualization using gnuplot
 	// Create a grid of complex numbers for plotting
-	// auto plt = PlotUtils(-1.0, 1.0, -1.0, 1.0, 500);
+	auto plt = PlotUtils(-1.0, 1.0, -1.0, 1.0, 500);
 	// auto dataFile = plt.getPhaseData([&](const std::complex<double> z) {
 	// 	return fun(z, epsilon);
 	// });

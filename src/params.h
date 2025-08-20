@@ -5,9 +5,11 @@
 #ifndef GRPFC_PARAMS_H
 #define GRPFC_PARAMS_H
 
+#include "Eigen/dense"
+
 // define struct contains all parameters of the analysis
 // optional,xb,xe,yb,ye,Tol,NodesMin,NodesMax,ItMax,Mode
-struct analysisParams {
+struct AnalysisParams {
 	double xb; // real part begin
 	double xe; // real part end
 	double yb; // imaginary part begin
@@ -23,5 +25,11 @@ struct analysisParams {
 	int ItMax; // maximum number of iterations
 	// mode of operation (0: Self-adaptive Mesh Generator, 1: Regular Global complex Roots and Poles Finding algorithm)
 	int Mode;
+};
+
+struct PreviousIt {
+	Eigen::ArrayX2d edgesToSplit; // edges to split in the previous iteration
+	Eigen::ArrayX2d elements; // elements in the previous iteration
+	Eigen::ArrayXd gradeInElements; // grade in elements in the previous iteration
 };
 #endif //GRPFC_PARAMS_H

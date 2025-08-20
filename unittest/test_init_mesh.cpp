@@ -6,7 +6,7 @@
 
 int main() {
 		// Example usage of rect_dom
-		double xb = 0.0, xe = 1.0, yb = 0.0, ye = 1.0;
+		double xb = -1.0, xe = 1.0, yb = -2.0, ye = 5.0;
 		Eigen::MatrixXd mesh = rect_dom(xb, xe, yb, ye);
 		std::cout << "Rectangular Domain Mesh:\n" << mesh << std::endl;
 
