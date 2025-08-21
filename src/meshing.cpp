@@ -10,7 +10,7 @@
 Eigen::MatrixXd rect_dom(double xb, double xe, double yb, double ye) {
 	double X = xe - xb;
 	double Y = ye - yb;
-	int n = 300;
+	int n = 10;
 	Eigen::MatrixXd NodesCoord;
 
 	if (X == Y) {

@@ -11,7 +11,7 @@ add_subdirectory(CDT/CDT CDT)
 include_directories(CDT/CDT/include)
 
 add_library(grpfc SHARED
-    src/regular.cpp
+    src/grpf.cpp
     src/meshing.cpp
     src/triangulation.cpp
     src/phase.cpp
@@ -19,7 +19,7 @@ add_library(grpfc SHARED
     unittest/test_init_mesh.cpp
     src/analyse.cpp
     include/analyse.h
-    include/regular.h
+    include/grpf.h
     include/meshing.h
     include/triangulation.h
     include/phase.h

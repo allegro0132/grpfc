@@ -7,6 +7,7 @@
 namespace grpfc {
 	int phaseAnalyze(const CDT::EdgeUSet& edges, const std::vector<int>& quadrants,
 	                 std::vector<int>& phasesDiff, CDT::EdgeUSet& candidateEdges) {
+		candidateEdges = CDT::EdgeUSet();
 		for (auto e: edges) {
 			int phaseDiff = std::abs(quadrants.at(e.v1()) - quadrants.at(e.v2()));
 			if (phaseDiff == 3) { phaseDiff = 1; }

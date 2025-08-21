@@ -82,6 +82,7 @@ private:
 	// 2: Aborted, 3: Accuracy achieved)
 	int mode;
 	CDT::EdgeUSet candidateEdges;
+	CDT::EdgeUSet edgesToSplit;
 	std::vector<std::complex<double>> functionValues;
 	Eigen::ArrayX2d newNodesCoord;
 };

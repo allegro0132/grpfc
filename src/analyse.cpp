@@ -11,7 +11,7 @@
 #include "triangulation.h"
 #include "meshing.h"
 #include "phase.h"
-#include "regular.h"
+#include "grpf.h"
 #include "utils.h"
 
 GRPFAnalyse::GRPFAnalyse(std::function<std::complex<double>(std::complex<double>)> func, const AnalysisParams& params,
@@ -40,10 +40,10 @@ int GRPFAnalyse::GenerateDiskMesh() {
 }
 
 int GRPFAnalyse::SplitEdge() {
-	newNodesCoord = Eigen::ArrayX2d::Zero(candidateEdges.size(), 2);
+	newNodesCoord = Eigen::ArrayX2d::Zero(edgesToSplit.size(), 2);
 	int i = 0;
-	if (candidateEdges.size() > 0) {
-		for (auto e: candidateEdges) {
+	if (edgesToSplit.size() > 0) {
+		for (auto e: edgesToSplit) {
 			newNodesCoord.row(i) = (nodesCoord.row(e.v1()) + nodesCoord.row(e.v2())) / 2;
 			i++;
 		}
@@ -71,7 +71,7 @@ int GRPFAnalyse::Triangulate() {
 
 int GRPFAnalyse::RegularGRPF() {
 	// Regular Global complex Roots and Poles Finding algorithm
-	grpfc::regularGRPF(nodesCoord, params.Tol, elements, candidateEdges, mode);
+	edgesToSplit = grpfc::regularGRPF(nodesCoord, params.Tol, elements, candidateEdges, mode);
 	return 0;
 }
 
@@ -96,7 +96,6 @@ int GRPFAnalyse::AdaptiveMeshGRPF() {
 int GRPFAnalyse::SelfAdaptiveRun() {
 	while (it < params.ItMax && mode < 2) {
 		// Function evaluation
-		std::cout << "Iteration: " << it + 1 << std::endl;
 		EvaluateFunction();
 		// Concat NodesCoord
 		auto oldNodesNum = nodesCoord.rows();
@@ -193,20 +192,18 @@ int GRPFAnalyse::AnalyseRegion() {
 			if (it2 != contourEdges.end()) {
 				// If multiple, use find_next_node
 				auto prevNode = regions.back().back();
-				std::vector tempNodes{it2->second};
-				std::vector arIt{it2};
+				std::vector tempNodes{it->second};
+				std::vector arIt{it};
 				while (it2 != contourEdges.end()) {
+					tempNodes.push_back(it2->second);
+					arIt.push_back(it2);
 					it2 = std::find_if(std::next(it2), contourEdges.end(),
 					                   [&](const DirectedEdge&edge) {
 						                   return edge.first == refNode;
 					                   });
-					tempNodes.push_back(it2->second);
-					arIt.push_back(it2);
-					++it2; // Move to the next element to search for the next occurrence
-					auto index = grpfc::findNextNode(nodesCoord, prevNode, refNode, tempNodes);
-					std::cout << "Index: " << index << std::endl;
-					it = arIt[index];
 				}
+				auto index = grpfc::findNextNode(nodesCoord, prevNode, refNode, tempNodes);
+				it = arIt[index];
 			}
 			regions.back().push_back(it->first);
 			refNode = it->second;
@@ -215,12 +212,6 @@ int GRPFAnalyse::AnalyseRegion() {
 	}
 	regions.back().push_back(refNode);
 	return 0;
-	// grpfc::findNextNode test
-	// n=300
-	// auto index = grpfc::findNextNode(nodesCoord, 52124, 52125, {51826, 52425});
-	// n=600
-	// auto index = grpfc::findNextNode(nodesCoord, 208049, 208050, {208649, 207450});
-	// std::cout << "Index: " << index << std::endl;
 }
 
 AnalyseRegionsResult GRPFAnalyse::GetRootsAndPoles() {
@@ -233,7 +224,7 @@ AnalyseRegionsResult GRPFAnalyse::GetRootsAndPoles() {
 	Eigen::Map<Eigen::ArrayXi> quadrantsEigen(quadrants.data(), quadrants.size());
 	for (const auto&region: regions) {
 		auto quadrantSequence = quadrantsEigen(region);
-		auto size_region = quadrantSequence.size();
+		auto size_region = region.size();
 		Eigen::ArrayXi dQ = quadrantSequence.tail(size_region - 1) - quadrantSequence.head(size_region - 1);
 		// modify dQ element
 		for (int i = 0; i < dQ.size(); i++) {

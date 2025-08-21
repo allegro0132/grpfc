@@ -11,9 +11,9 @@ std::complex<double> func(const std::complex<double>& z) {
 
 int main() {
 	// Initialization parameters
-	int ItMax = 1; // Example value, set as needed
-	int NodesMin = 10; // Example value
-	int NodesMax = 1000; // Example value
+	int ItMax = 100; // Example value, set as needed
+	int NodesMin = 0; // Example value
+	int NodesMax = INFINITY; // Example value
 	double Tol = 1e-6; // Example value
 	double xb = -2.0;
 	double xe = 2.0;
