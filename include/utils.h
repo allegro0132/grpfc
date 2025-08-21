@@ -11,7 +11,7 @@
 #include <fstream>
 #include <Eigen/Dense>
 #include "CDT.h"
-#include "../include/gnuplot.h"
+#include "gnuplot.h"
 
 class PlotUtils {
 public:

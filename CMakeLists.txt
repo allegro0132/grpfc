@@ -3,6 +3,8 @@ project(grpfc)
 
 set(CMAKE_CXX_STANDARD 20)
 
+include_directories(include)
+
 include_directories(eigen)
 
 add_subdirectory(CDT/CDT CDT)
@@ -10,19 +12,19 @@ include_directories(CDT/CDT/include)
 
 add_library(grpfc SHARED
     src/regular.cpp
-    src/regular.h
     src/meshing.cpp
-    src/meshing.h
     src/triangulation.cpp
-    src/triangulation.h
     src/phase.cpp
-    src/phase.h
     src/cauchy.cpp
-    src/cauchy.h
-    src/utils.h
     unittest/test_init_mesh.cpp
     src/analyse.cpp
-    src/analyse.h
+    include/analyse.h
+    include/regular.h
+    include/meshing.h
+    include/triangulation.h
+    include/phase.h
+    include/cauchy.h
+    include/utils.h
 )
 
 add_executable(main src/main.cpp)

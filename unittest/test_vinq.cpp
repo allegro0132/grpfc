@@ -2,7 +2,7 @@
 // Created by Ziang on 2025/8/20.
 //#include <gtest/gtest.h>
 #include <complex>
-#include "../src/utils.h"
+#include "utils.h"
 
 TEST(VinqFunction, Returns1ForFirstQuadrant) {
 	std::complex<double> input(1.0, 1.0);
