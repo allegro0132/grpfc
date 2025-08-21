@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 4.0)
+cmake_minimum_required(VERSION 3.20)
 project(grpfc)
 
 set(CMAKE_CXX_STANDARD 20)
@@ -25,8 +25,7 @@ add_library(grpfc SHARED
     src/analyse.h
 )
 
-add_executable(main src/main.cpp
-    src/utils.h)
+add_executable(main src/main.cpp)
 target_link_libraries(main grpfc)
 
 # Building examples
