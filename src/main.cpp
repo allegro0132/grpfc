@@ -10,7 +10,7 @@
 #include "params.h"
 // #include "adaptive.h"
 // #include "analyse_gradients.h"
-// #include "analyse_regions.h"
+#include "analyse.h"
 #include "regular.h"
 // #include "rect_dom.h" // To be implemented
 // #include "fun.h" // To be implemented
@@ -30,10 +30,10 @@ int main() {
 	int NodesMin = 10; // Example value
 	int NodesMax = 1000; // Example value
 	double Tol = 1e-6; // Example value
-	double xb = -0.01;
-	double xe = 0.01;
-	double yb = -100.0;
-	double ye = 1.0; // Domain bounds, set as needed
+	double xb = -2.0;
+	double xe = 2.0;
+	double yb = -2.0;
+	double ye = 2.0; // Domain bounds, set as needed
 	// Optional parameters for fun()
 	double epsilon = 0.01;
 
@@ -44,10 +44,14 @@ int main() {
 	int it = 0;
 	size_t nofNodes = 0; // Number of nodes, to be updated during iterations
 	Eigen::ArrayX2d nodesCoord(0, 2); // Initial empty nodes coordinate array
+	CDT::TriangleVec elements;
+	CDT::EdgeUSet edges;
+	std::vector<int> phasesDiff;
+	CDT::EdgeUSet candidateEdges;
+	std::vector<std::complex<double>> functionValues;
+	std::vector<int> quadrants;
 	// Generate initial mesh
 	Eigen::ArrayX2d newNodesCoord = rect_dom(xb, xe, yb, ye);
-	Eigen::ArrayXcd functionValues;
-	Eigen::ArrayXi quadrants;
 	// PreviousIt struct equivalent
 	PreviousIt previousIt;
 
@@ -55,8 +59,6 @@ int main() {
 		// Function evaluation
 		std::cout << "Iteration: " << it + 1 << std::endl;
 		std::cout << "Evaluating the function at new points: " << newNodesCoord.rows() << " nodes" << std::endl;
-		std::vector<std::complex<double>> functionValues;
-		std::vector<int> quadrants;
 		for (auto coord_in: newNodesCoord.rowwise()) {
 			std::complex<double> z_in = std::complex<double>(coord_in(0), coord_in(1));
 			auto z_out = fun(z_in, epsilon);
@@ -71,8 +73,6 @@ int main() {
 		// Meshing operation
 		std::cout << "Triangulation and analysis of: " << nofNodes << " nodes" << std::endl;
 		auto nodesCDT = grpfc::convertToCDTPoints(nodesCoord);
-		CDT::TriangleVec elements;
-		CDT::EdgeUSet edges;
 		grpfc::triangulate(nodesCDT, elements, edges);
 
 		// for (auto e: elements) {
@@ -86,10 +86,14 @@ int main() {
 		// std::cout << dat << std::endl;
 
 		// Phase analysis
-		std::vector<int> phasesDiff;
-		CDT::EdgeUSet candidateEdges;
 		grpfc::phaseAnalyze(edges, quadrants, phasesDiff, candidateEdges);
-
+		// for (auto edge: candidateEdges) {
+		// 	auto attach = grpfc::edgeAttachment(edge, elements);
+		// 	for (auto a: attach) {
+		// 		std::cout << a << " ";
+		// 	}
+		// 	std::cout << std::endl;
+		// }
 		if (mode == 0) {
 			// Self-adaptive Mesh Generator Mode
 			// adaptive(...);
@@ -108,14 +112,20 @@ int main() {
 		}
 		if (mode == 1) {
 			// Regular Global complex Roots and Poles Finding algorithm
-			std::cout << "Begin: " << candidateEdges.size() << std::endl;
 			grpfc::regularGRPF(nodesCoord, params.Tol, elements, candidateEdges, mode);
-			std::cout << "End: " << candidateEdges.size() << std::endl;
 		}
 
-		// Split the edge in half (to be implemented)
-		// NewNodesCoord = ...;
+		// Split the edge in half
+		newNodesCoord = Eigen::ArrayX2d::Zero(candidateEdges.size(), 2);
+		int i = 0;
+		if (candidateEdges.size() > 0) {
+			for (auto e: candidateEdges) {
+				newNodesCoord.row(i) = (nodesCoord.row(e.v1()) + nodesCoord.row(e.v2())) / 2;
+				i++;
+			}
+		}
 
+		// std::cout << newNodesCoord << std::endl;
 		it++;
 		std::cout << "Iteration: " << it << " done" << std::endl;
 		std::cout << "----------------------------------------------------------------" << std::endl;
@@ -129,7 +139,7 @@ int main() {
 		std::cout << "Assumed accuracy is achieved in iteration: " << it << std::endl;
 	}
 
-	// analyse_regions(...); // To be implemented
+	grpfc::analyse_regions(nodesCoord, elements, edges, quadrants, phasesDiff, candidateEdges);
 
 	return 0;
 }

@@ -10,17 +10,17 @@
 Eigen::MatrixXd rect_dom(double xb, double xe, double yb, double ye) {
     double X = xe - xb;
     double Y = ye - yb;
-    int n = 2;
+    int n = 300;
     Eigen::MatrixXd NodesCoord;
 
     if (X == Y) {
-        NodesCoord.resize(4, 2);
-        NodesCoord << xb, yb,
-                      xe, yb,
-                      xe, ye,
-                      xb, ye;
-        return NodesCoord;
-    } else if (X >= Y) {
+    //     NodesCoord.resize(4, 2);
+    //     NodesCoord << xb, yb,
+    //                   xe, yb,
+    //                   xe, ye,
+    //                   xb, ye;
+    //     return NodesCoord;
+    // } else if (X >= Y) {
         double r = Y / (n - 1);
         double dy = Y / (n - 1);
         int m = std::ceil(X / std::sqrt(r * r - dy * dy / 4) + 1);

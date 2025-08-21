@@ -24,6 +24,8 @@ add_library(grpfc SHARED
     src/utils.h
     src/params.h
     unittest/test_init_mesh.cpp
+    src/analyse.cpp
+    src/analyse.h
 )
 
 add_executable(main src/main.cpp

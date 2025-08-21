@@ -2,6 +2,7 @@
 // Created by Ziang on 2025/8/19.
 //
 
+#include <limits>
 #include "triangulation.h"
 #include "CDT.h"
 
@@ -55,4 +56,40 @@ namespace grpfc {
 		}
 		return skinnyEdges;
 	}
+
+	/*
+	 * finds the next node in the candidate region boudary process. The next one (after the reference one) is picked from
+	 * the fixed set of nodes.
+	 */
+	int findNextNode(const Eigen::MatrixX2d& nodesCoord, const CDT::VertInd& prevNode, const CDT::VertInd& refNode,
+	                 const std::vector<CDT::VertInd>& tempNodes) {
+		auto numTempNodes = tempNodes.size();
+		Eigen::Vector2d coordP = nodesCoord.row(prevNode);
+		Eigen::Vector2d coordS = nodesCoord.row(refNode);
+		Eigen::MatrixX2d coordNs(numTempNodes, 2);
+		for (Eigen::Index i = 0; i < numTempNodes; ++i) {
+			coordNs.row(i) = nodesCoord.row(tempNodes[i]);
+		}
+		// broadcast (2, 1) * (1, 2) to  (2, 2)
+		Eigen::ArrayX2d sp = (coordP - coordS).transpose().replicate(numTempNodes, 1);
+
+		Eigen::ArrayX2d sn = coordNs.rowwise() - coordS.transpose();
+
+		Eigen::ArrayXd lenSP = sp.rowwise().norm();
+		Eigen::ArrayXd lenSN = sn.rowwise().norm();
+
+		Eigen::ArrayXd dotProd = sp.col(0) * sn.col(0) + sp.col(1) * sn.col(1);
+		std::cout << "findNextNode" << std::endl;
+		Eigen::ArrayXd phi = (dotProd * (lenSP * lenSN).inverse()).acos();
+
+		for (int i = 0; i < phi.rows(); ++i) {
+			if (sp(i, 0) * sn(i, 1) - sp(i, 1) * sn(i, 0) < 0)
+				phi(i) = 2 * M_PI - phi(i);
+		}
+
+		Eigen::Index minIndex;
+		phi.minCoeff(&minIndex);
+		return static_cast<int>(minIndex);
+	}
+
 }

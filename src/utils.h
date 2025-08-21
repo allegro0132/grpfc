@@ -150,5 +150,19 @@ namespace grpfc {
 		}
 		return indTriangles;
 	}
+
+	inline std::vector<int> edgeAttachment(CDT::Edge edge, CDT::TriangleVec elements) {
+		std::vector<int> indTriangles;
+		for (int i=1; i < elements.size(); ++i) {
+			// check if any vertex of the triangle is in the candidate
+			auto tri = elements[i];
+			if (std::find(tri.vertices.begin(), tri.vertices.end(), edge.v1()) != tri.vertices.end()) {
+				if (std::find(tri.vertices.begin(), tri.vertices.end(), edge.v2()) != tri.vertices.end()) {
+					indTriangles.push_back(i); // Get index of triangle
+				}
+			}
+		}
+		return indTriangles;
+	}
 }
 #endif //GRPFC_UTILS_H

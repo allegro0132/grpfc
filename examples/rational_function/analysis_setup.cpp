@@ -16,7 +16,9 @@ inline std::complex<double> fun(const std::complex<double> z, const double epsil
 	std::complex<double> zb(0.0, std::sqrt(3.0) / 3.0);
 	std::complex<double> zc(-0.5, -std::sqrt(3.0) / 6.0);
 
-	std::complex<double> w = (z - za) * (z - zb - epsilon) / (z - zc) / (z - zb + epsilon);
+	// std::complex<double> w = (z - za) * (z - zb - epsilon) / (z - zc) / (z - zb + epsilon);
+	// std::complex<double> w = (z - 1.0) * std::pow((z - std::complex<double>(0, 1.0)), 2) * std::pow((z + 1.0), 3) / (z + std::complex<double>(0, 1.0));
+	std::complex<double> w = (z - 1.0) * std::pow((z - std::complex<double>(0, 1.0)), 2) * (z + 1.0) / (z + std::complex<double>(0, 1.0));
 	return w;
 }
 
