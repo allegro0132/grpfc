@@ -4,7 +4,6 @@
 
 #ifndef GRPFC_INITIAL_MESH_H
 #define GRPFC_INITIAL_MESH_H
-#include <vector>
 #include <Eigen/Dense>
 
 // Generates the initial mesh for a rectangular domain

@@ -1,31 +1,16 @@
 // SA-GRPF implemented in C++
 // Origin Project homepage: https://github.com/PioKow/SAGRPF
-
 #include <iostream>
-#include <vector>
-#include "Eigen/dense"
-#include "CDT.h"
-#include "initial_mesh.h"
-#include "utils.h"
-#include "params.h"
-// #include "adaptive.h"
-// #include "analyse_gradients.h"
 #include "analyse.h"
-#include "regular.h"
-// #include "rect_dom.h" // To be implemented
-// #include "fun.h" // To be implemented
-// #include "vinq.h" // To be implemented
-// #include "vis.h" // To be implemented
 
-#include "phase_grad.h"
-#include "regular.h"
-#include "triangulation.h"
-#include "../examples/rational_function/analysis_setup.cpp"
-
+std::complex<double> func(const std::complex<double>& z) {
+	std::complex<double> w = (z - 1.0) * std::pow((z - std::complex<double>(0, 1.0)), 2) * (z + 1.0) / (
+		                         z + std::complex<double>(0, 1.0));
+	return w;
+}
 
 int main() {
 	// Initialization parameters
-	int mode = 1; // 0: Adaptive, 1: Regular, 2: Aborted, 3: Accuracy achieved
 	int ItMax = 1; // Example value, set as needed
 	int NodesMin = 10; // Example value
 	int NodesMax = 1000; // Example value
@@ -35,114 +20,23 @@ int main() {
 	double yb = -2.0;
 	double ye = 2.0; // Domain bounds, set as needed
 	// Optional parameters for fun()
-	double epsilon = 0.01;
+	double epsilon = 0.0;
 
 	// set up the analysis parameters
-	AnalysisParams params{xb, xe, yb, ye, Tol, NodesMin, NodesMax, ItMax, mode};
+	AnalysisParams params{xb, xe, yb, ye, Tol, NodesMin, NodesMax, ItMax};
 
 	// initialize the variables
-	int it = 0;
-	size_t nofNodes = 0; // Number of nodes, to be updated during iterations
-	Eigen::ArrayX2d nodesCoord(0, 2); // Initial empty nodes coordinate array
-	CDT::TriangleVec elements;
-	CDT::EdgeUSet edges;
-	std::vector<int> phasesDiff;
-	CDT::EdgeUSet candidateEdges;
-	std::vector<std::complex<double>> functionValues;
-	std::vector<int> quadrants;
-	// Generate initial mesh
-	Eigen::ArrayX2d newNodesCoord = rect_dom(xb, xe, yb, ye);
-	// PreviousIt struct equivalent
-	PreviousIt previousIt;
-
-	while (it < params.ItMax && params.Mode < 2) {
-		// Function evaluation
-		std::cout << "Iteration: " << it + 1 << std::endl;
-		std::cout << "Evaluating the function at new points: " << newNodesCoord.rows() << " nodes" << std::endl;
-		for (auto coord_in: newNodesCoord.rowwise()) {
-			std::complex<double> z_in = std::complex<double>(coord_in(0), coord_in(1));
-			auto z_out = fun(z_in, epsilon);
-			functionValues.push_back(z_out); // Evaluate the function at new nodes
-			quadrants.push_back(grpfc::vinq(z_out));
-		}
-		// Concat NodesCoord
-		auto oldNodesNum = nodesCoord.rows();
-		nodesCoord.conservativeResize(nodesCoord.rows() + newNodesCoord.rows(), 2);
-		nodesCoord.block(oldNodesNum, 0, newNodesCoord.rows(), 2) = newNodesCoord;
-		nofNodes = nodesCoord.rows();
-		// Meshing operation
-		std::cout << "Triangulation and analysis of: " << nofNodes << " nodes" << std::endl;
-		auto nodesCDT = grpfc::convertToCDTPoints(nodesCoord);
-		grpfc::triangulate(nodesCDT, elements, edges);
-
-		// for (auto e: elements) {
-		// 	std::cout << e.vertices[0] << " " << e.vertices[1] << " " << e.vertices[2] << std::endl;
-		// }
-		// for (auto e: edges) {
-		// 	std::cout << e.v1() << " " << e.v2() << std::endl;
-		// }
-
-		// Eigen::Map<Eigen::ArrayXi> dat(quadrants.data(), quadrants.size());
-		// std::cout << dat << std::endl;
-
-		// Phase analysis
-		grpfc::phaseAnalyze(edges, quadrants, phasesDiff, candidateEdges);
-		// std::cout << "Candidate size: " << candidateEdges.size() << std::endl;
-		// std::cout << "Phaeses size: " << phasesDiff.size() << std::endl;
-		// for (auto edge: candidateEdges) {
-		// 	auto attach = grpfc::edgeAttachment(edge, elements);
-		// 	for (auto a: attach) {
-		// 		std::cout << a << " ";
-		// 	}
-		// 	std::cout << std::endl;
-		// }
-		if (mode == 0) {
-			// Self-adaptive Mesh Generator Mode
-			// adaptive(...);
-			// PreviousIt.EdgesToSplit = ...;
-			// PreviousIt.Elements = ...;
-			// PreviousIt.GradeInElements = ...;
-
-			// if (PreviousIt.EdgesToSplit.empty()) Mode = 3;
-			// else if (NodesCoord.size() > NodesMin && NodesCoord.size() < NodesMax) {
-			//     // Visualization and user prompt (to be implemented)
-			//     Mode = 0; // or set by user
-			// } else if (NodesCoord.size() >= NodesMax) Mode = 1;
-			// if (Mode == 1) {
-			//     std::cout << "The mode has been switched to the regular GRPF" << std::endl;
-			// }
-		}
-		if (mode == 1) {
-			// Regular Global complex Roots and Poles Finding algorithm
-			grpfc::regularGRPF(nodesCoord, params.Tol, elements, candidateEdges, mode);
-			// std::cout << "Candidate size: " << candidateEdges.size() << std::endl;
-		}
-
-		// Split the edge in half
-		newNodesCoord = Eigen::ArrayX2d::Zero(candidateEdges.size(), 2);
-		int i = 0;
-		if (candidateEdges.size() > 0) {
-			for (auto e: candidateEdges) {
-				newNodesCoord.row(i) = (nodesCoord.row(e.v1()) + nodesCoord.row(e.v2())) / 2;
-				i++;
-			}
-		}
-
-		// std::cout << newNodesCoord << std::endl;
-		it++;
-		std::cout << "Iteration: " << it << " done" << std::endl;
-		std::cout << "----------------------------------------------------------------" << std::endl;
+	GRPFAnalyse grpf(func, params);
+	grpf.SelfAdaptiveRun();
+	// Get results
+	auto res = grpf.result;
+	std::cout << "Roots: " << std::endl;
+	for (auto root: res.zRoots) {
+		std::cout << root << std::endl;
 	}
-
-	// Final analysis
-	if (mode == 2) {
-		std::cout << "Finish after: " << it << " iteration" << std::endl;
+	std::cout << "Poles: " << std::endl;
+	for (auto pole: res.zPoles) {
+		std::cout << pole << std::endl;
 	}
-	if (mode == 3) {
-		std::cout << "Assumed accuracy is achieved in iteration: " << it << std::endl;
-	}
-
-	grpfc::analyse_regions(nodesCoord, elements, quadrants, candidateEdges);
-
 	return 0;
 }

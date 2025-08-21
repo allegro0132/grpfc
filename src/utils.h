@@ -7,7 +7,6 @@
 
 #pragma once
 #include <vector>
-#include <numeric>
 #include <complex>
 #include <fstream>
 #include <Eigen/Dense>
@@ -31,7 +30,7 @@ public:
 		this->step_y = (end_y - start_y) / (grid_size - 1);
 	}
 
-	std::string getPhaseData(const std::function<std::complex<double>(std::complex<double>)>&fun) {
+	std::string getPhaseData(const std::function<std::complex<double>(std::complex<double>)>& fun) {
 		std::ofstream output_phase("phase.dat");
 		for (int i = 0; i < grid_size; ++i) {
 			for (int j = 0; j < grid_size; ++j) {
@@ -47,7 +46,7 @@ public:
 		return "phase.dat";
 	}
 
-	std::string getMagnitudeData(const std::function<std::complex<double>(std::complex<double>)>&fun) {
+	std::string getMagnitudeData(const std::function<std::complex<double>(std::complex<double>)>& fun) {
 		std::ofstream output("mag.dat");
 		for (int i = 0; i < grid_size; ++i) {
 			for (int j = 0; j < grid_size; ++j) {
@@ -139,9 +138,9 @@ namespace grpfc {
 		return cdt_points;
 	}
 
-	inline std::vector<int> vertexAttachment(CDT::VertInd vertInd, CDT::TriangleVec elements) {
+	inline std::vector<int> vertexAttachment(const CDT::VertInd& vertInd, const CDT::TriangleVec& elements) {
 		std::vector<int> indTriangles;
-		for (int i=1; i < elements.size(); ++i) {
+		for (int i = 1; i < elements.size(); ++i) {
 			// check if any vertex of the triangle is in the candidate
 			auto tri = elements[i];
 			if (std::find(tri.vertices.begin(), tri.vertices.end(), vertInd) != tri.vertices.end()) {
@@ -151,9 +150,9 @@ namespace grpfc {
 		return indTriangles;
 	}
 
-	inline std::vector<int> edgeAttachment(CDT::Edge edge, CDT::TriangleVec elements) {
+	inline std::vector<int> edgeAttachment(const CDT::Edge& edge, const CDT::TriangleVec& elements) {
 		std::vector<int> indTriangles;
-		for (int i=1; i < elements.size(); ++i) {
+		for (int i = 1; i < elements.size(); ++i) {
 			// check if any vertex of the triangle is in the candidate
 			auto tri = elements[i];
 			if (std::find(tri.vertices.begin(), tri.vertices.end(), edge.v1()) != tri.vertices.end()) {

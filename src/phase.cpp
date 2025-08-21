@@ -2,7 +2,7 @@
 // Created by Ziang on 2025/8/19.
 //
 #include "CDT.h"
-#include "phase_grad.h"
+#include "phase.h"
 
 namespace grpfc {
 	int phaseAnalyze(const CDT::EdgeUSet& edges, const std::vector<int>& quadrants,

@@ -7,7 +7,7 @@
 
 namespace grpfc {
 	int phaseAnalyze(const CDT::EdgeUSet& edges, const std::vector<int>& quadrants,
-									 std::vector<int>& phasesDiff, CDT::EdgeUSet& candidateEdges);
+	                 std::vector<int>& phasesDiff, CDT::EdgeUSet& candidateEdges);
 }
 
 #endif //GRPFC_PHASE_GRAD_H

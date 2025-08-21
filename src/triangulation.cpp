@@ -2,7 +2,6 @@
 // Created by Ziang on 2025/8/19.
 //
 
-#include <limits>
 #include "triangulation.h"
 #include "CDT.h"
 
@@ -79,7 +78,6 @@ namespace grpfc {
 		Eigen::ArrayXd lenSN = sn.rowwise().norm();
 
 		Eigen::ArrayXd dotProd = sp.col(0) * sn.col(0) + sp.col(1) * sn.col(1);
-		std::cout << "findNextNode" << std::endl;
 		Eigen::ArrayXd phi = (dotProd * (lenSP * lenSN).inverse()).acos();
 
 		for (int i = 0; i < phi.rows(); ++i) {
@@ -91,5 +89,4 @@ namespace grpfc {
 		phi.minCoeff(&minIndex);
 		return static_cast<int>(minIndex);
 	}
-
 }

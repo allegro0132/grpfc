@@ -6,7 +6,6 @@
 #define GRPFC_REGULAR_H
 
 #include <Eigen/Dense>
-#include <vector>
 #include "CDT.h"
 
 namespace grpfc {
@@ -16,9 +15,9 @@ namespace grpfc {
 		int Mode;
 	};
 
-	int regularGRPF(const Eigen::ArrayX2d&nodesCoord, double tol,
-									const CDT::TriangleVec&elements,
-									CDT::EdgeUSet&candidateEdges, int& mode);
+	int regularGRPF(const Eigen::ArrayX2d& nodesCoord, double tol,
+	                const CDT::TriangleVec& elements,
+	                CDT::EdgeUSet& candidateEdges, int& mode, double skinRatio = 10);
 }
 
 #endif //GRPFC_REGULAR_H

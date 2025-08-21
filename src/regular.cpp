@@ -4,11 +4,9 @@
 
 #include "regular.h"
 #include "CDT.h"
-#include "regular.h"
 #include "utils.h"
 #include <Eigen/Dense>
 #include <iostream>
-#include <cmath>
 #include <set>
 
 #include "triangulation.h"
@@ -16,7 +14,7 @@
 namespace grpfc {
 	int regularGRPF(const Eigen::ArrayX2d& nodesCoord, double tol,
 	                const CDT::TriangleVec& elements,
-	                CDT::EdgeUSet& candidateEdges, int& mode) {
+	                CDT::EdgeUSet& candidateEdges, int& mode, double skinRatio) {
 		mode = 1;
 		if (candidateEdges.empty()) {
 			mode = 2;
@@ -42,19 +40,12 @@ namespace grpfc {
 			uniqueVert.insert(e.v1());
 			uniqueVert.insert(e.v2());
 		}
-		// auto indTriangles = grpfc::vertexAttachment(uniqueVert, elements);
+
 		std::vector<std::vector<int>> arCandidateElements;
 		for (auto ind: uniqueVert) {
-			auto indTriangles = grpfc::vertexAttachment(ind, elements);
+			auto indTriangles = vertexAttachment(ind, elements);
 			arCandidateElements.push_back(indTriangles);
 		}
-		// for (auto ind: indTriangles) {
-		// 	std::cout << ind << std::endl;
-		// 	for (auto v: elements[ind].vertices) {
-		// 		std::cout << nodesCoord.row(v) << " ";
-		// 	}
-		// 	std::cout << std::endl;
-		// }
 
 		std::vector<int> numConnectionsToCandidate(elements.size(), 0);
 		for (auto indTriangles: arCandidateElements) {
@@ -70,7 +61,7 @@ namespace grpfc {
 			}
 		}
 
-		auto skinnyEdges = grpfc::find_skinny_elements(candidateElements, nodesCoord, 10);
+		auto skinnyEdges = find_skinny_elements(candidateElements, nodesCoord, skinRatio);
 
 		// concat candidateEdges and skinnyEdges
 		for (auto skinny: skinnyEdges) {
@@ -89,5 +80,4 @@ namespace grpfc {
 		}
 		return 0;
 	}
-
 }

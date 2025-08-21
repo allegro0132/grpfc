@@ -7,25 +7,87 @@
 #include <vector>
 
 // Analyse mesh regions, roots, and poles
-#include <Eigen/Dense>
 #include <complex>
 #include "CDT.h"
+#include "utils.h"
 
 using DirectedEdge = std::pair<CDT::VertInd, CDT::VertInd>;
 
-// Placeholder for DT type
-class DTType;
+// define struct contains all parameters of the analysis
+// optional,xb,xe,yb,ye,Tol,NodesMin,NodesMax,ItMax,Mode
+struct AnalysisParams {
+	double xb; // real part begin
+	double xe; // real part end
+	double yb; // imaginary part begin
+	double ye; // imaginary part end
+	double Tol; // tolerance for finding roots
+	// the number of points below which the adaptive mode is automatically used (without interrupt possibilities)
+	// set 0 if you want to manually choose the mode after each iteration
+	int NodesMin; // minimum number of nodes
+	// the number of points after that the regular mode is automatically switched (without interrupt possibilities)
+	// set Inf if you want to manually choose the mode after each iteration
+	int NodesMax; // maximum number of nodes
+	// Maximum number of iterations (buffer)
+	int ItMax; // maximum number of iterations
+};
+
+struct AnalyseRegionsResult {
+	std::vector<std::vector<CDT::VertInd>> regions;
+	std::vector<std::complex<double>> zRoots;
+	std::vector<double> zRootsMultiplicity;
+	std::vector<std::complex<double>> zPoles;
+	std::vector<double> zPolesMultiplicity;
+};
+
+class GRPFAnalyse {
+public:
+	AnalysisParams params;
+	std::function<std::complex<double>(std::complex<double>)> func;
+	int it;
+	Eigen::ArrayX2d nodesCoord; // Initial empty nodes coordinate array
+	CDT::TriangleVec elements;
+	CDT::EdgeUSet edges;
+	std::vector<int> phasesDiff;
+	std::vector<int> quadrants;
+	AnalyseRegionsResult result;
+	std::vector<std::vector<CDT::VertInd>> regions;
+
+	GRPFAnalyse(std::function<std::complex<double>(std::complex<double>)> func, const AnalysisParams& params,
+	            std::string meshType = "rect");
+
+	Eigen::Index numNodes() { return nodesCoord.rows(); }
+
+	int GenerateRectangleMesh();
+
+	int GenerateDiskMesh();
+
+	int SelfAdaptiveRun();
+
+	int EvaluateFunction();
+
+	int RegularGRPF();
+
+	int AdaptiveMeshGRPF();
+
+	int Triangulate();
+
+	int SplitEdge();
+
+	int AnalyseRegion();
+
+	AnalyseRegionsResult GetRootsAndPoles();
+
+private:
+	// mode of operation (0: Self-adaptive Mesh Generator, 1: Regular Global complex Roots and Poles Finding algorithm,
+	// 2: Aborted, 3: Accuracy achieved)
+	int mode;
+	CDT::EdgeUSet candidateEdges;
+	std::vector<std::complex<double>> functionValues;
+	Eigen::ArrayX2d newNodesCoord;
+};
 
 namespace grpfc {
-	struct AnalyseRegionsResult {
-		std::vector<std::vector<CDT::VertInd>> regions;
-		std::vector<std::complex<double>> zRoots;
-		std::vector<double> zRootsMultiplicity;
-		std::vector<std::complex<double>> zPoles;
-		std::vector<double> zPolesMultiplicity;
-	};
-
-	AnalyseRegionsResult analyse_regions(
+	AnalyseRegionsResult analyseRegions(
 		const Eigen::MatrixXd& nodesCoord,
 		const CDT::TriangleVec& elements,
 		std::vector<int>& quadrants,

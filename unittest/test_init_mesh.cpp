@@ -2,7 +2,7 @@
 // Created by Ziang on 2025/8/19.
 //
 #include <iostream>
-#include "../src/initial_mesh.h"
+#include "../src/meshing.h"
 
 int main() {
 		// Example usage of rect_dom

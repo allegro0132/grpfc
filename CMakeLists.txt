@@ -11,18 +11,15 @@ include_directories(CDT/CDT/include)
 add_library(grpfc SHARED
     src/regular.cpp
     src/regular.h
-    src/initial_mesh.cpp
-    src/initial_mesh.h
+    src/meshing.cpp
+    src/meshing.h
     src/triangulation.cpp
     src/triangulation.h
-    src/phase_grad.cpp
-    src/phase_grad.h
-    src/adaptive_mesh.cpp
-    src/adaptive_mesh.h
+    src/phase.cpp
+    src/phase.h
     src/cauchy.cpp
     src/cauchy.h
     src/utils.h
-    src/params.h
     unittest/test_init_mesh.cpp
     src/analyse.cpp
     src/analyse.h
