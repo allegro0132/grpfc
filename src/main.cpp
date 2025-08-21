@@ -87,6 +87,8 @@ int main() {
 
 		// Phase analysis
 		grpfc::phaseAnalyze(edges, quadrants, phasesDiff, candidateEdges);
+		// std::cout << "Candidate size: " << candidateEdges.size() << std::endl;
+		// std::cout << "Phaeses size: " << phasesDiff.size() << std::endl;
 		// for (auto edge: candidateEdges) {
 		// 	auto attach = grpfc::edgeAttachment(edge, elements);
 		// 	for (auto a: attach) {
@@ -113,6 +115,7 @@ int main() {
 		if (mode == 1) {
 			// Regular Global complex Roots and Poles Finding algorithm
 			grpfc::regularGRPF(nodesCoord, params.Tol, elements, candidateEdges, mode);
+			// std::cout << "Candidate size: " << candidateEdges.size() << std::endl;
 		}
 
 		// Split the edge in half
@@ -139,7 +142,7 @@ int main() {
 		std::cout << "Assumed accuracy is achieved in iteration: " << it << std::endl;
 	}
 
-	grpfc::analyse_regions(nodesCoord, elements, edges, quadrants, phasesDiff, candidateEdges);
+	grpfc::analyse_regions(nodesCoord, elements, quadrants, candidateEdges);
 
 	return 0;
 }

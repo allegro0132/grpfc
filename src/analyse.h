@@ -18,8 +18,8 @@ class DTType;
 
 namespace grpfc {
 	struct AnalyseRegionsResult {
-		std::vector<std::vector<int>> Regions;
-		std::vector<std::complex<double>> zRoot;
+		std::vector<std::vector<CDT::VertInd>> regions;
+		std::vector<std::complex<double>> zRoots;
 		std::vector<double> zRootsMultiplicity;
 		std::vector<std::complex<double>> zPoles;
 		std::vector<double> zPolesMultiplicity;
@@ -28,9 +28,7 @@ namespace grpfc {
 	AnalyseRegionsResult analyse_regions(
 		const Eigen::MatrixXd& nodesCoord,
 		const CDT::TriangleVec& elements,
-		const CDT::EdgeUSet& edges,
-		const std::vector<int>& quadrants,
-		const std::vector<int>& phasesDiff,
+		std::vector<int>& quadrants,
 		const CDT::EdgeUSet& candidateEdges
 	);
 }

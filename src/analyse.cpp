@@ -14,12 +14,10 @@
 
 namespace grpfc {
 	AnalyseRegionsResult analyse_regions(
-		const Eigen::MatrixXd&nodesCoord,
-		const CDT::TriangleVec&elements,
-		const CDT::EdgeUSet&edges,
-		const std::vector<int>&quadrants,
-		const std::vector<int>&phasesDiff,
-		const CDT::EdgeUSet&candidateEdges
+		const Eigen::MatrixXd& nodesCoord,
+		const CDT::TriangleVec& elements,
+		std::vector<int>& quadrants,
+		const CDT::EdgeUSet& candidateEdges
 	) {
 		AnalyseRegionsResult result;
 		int numElements = elements.size();
@@ -114,71 +112,85 @@ namespace grpfc {
 		// auto index = grpfc::findNextNode(nodesCoord, 208049, 208050, {208649, 207450});
 		// std::cout << "Index: " << index << std::endl;
 
-		std::cout << "Region: " << regions.size() << std::endl;
-		for (auto region: regions) {
-			for (auto v: region) {
-				std::cout << v << " ";
-			}
-			std::cout << "Size: " << region.size() << std::endl;
-		}
+		// std::cout << "Region: " << regions.size() << std::endl;
+		// for (auto region: regions) {
+		// 	for (auto v: region) {
+		// 		std::cout << v << " ";
+		// 	}
+		// 	std::cout << "Size: " << region.size() << std::endl;
+		// }
+
 		// Results
-		// std::vector<double> q;
-		// std::vector<std::complex<double>> z;
-		// for (const auto&region: Regions) {
-		// 	std::vector<int> QuadrantSequence;
-		// 	for (int idx: region) {
-		// 		QuadrantSequence.push_back(Quadrants(idx));
-		// 	}
-		// 	std::vector<double> dQ;
-		// 	for (size_t i = 1; i < QuadrantSequence.size(); ++i) {
-		// 		double diff = QuadrantSequence[i] - QuadrantSequence[i - 1];
-		// 		if (diff == 3) diff = -1;
-		// 		if (diff == -3) diff = 1;
-		// 		if (std::abs(diff) == 2) diff = NAN;
-		// 		dQ.push_back(diff);
-		// 	}
-		// 	double qsum = 0.0;
-		// 	for (double val: dQ) {
-		// 		if (!std::isnan(val)) qsum += val;
-		// 	}
-		// 	q.push_back(qsum / 4.0);
-		// 	std::set<std::complex<double>> uniqueZ;
-		// 	for (int idx: region) {
-		// 		uniqueZ.insert(std::complex<double>(NodesCoord(idx, 0), NodesCoord(idx, 1)));
-		// 	}
-		// 	std::complex<double> zmean(0, 0);
-		// 	for (const auto&val: uniqueZ) {
-		// 		zmean += val;
-		// 	}
-		// 	if (!uniqueZ.empty()) zmean /= static_cast<double>(uniqueZ.size());
-		// 	z.push_back(zmean);
-		// 	// Visualization omitted
-		// 	std::cout << "Region: " << (&region - &Regions[0]) + 1 << " z = " << zmean << " with q = " << qsum / 4.0 <<
-		// 			std::endl;
-		// }
-		// result.Regions = Regions;
-		// for (size_t i = 0; i < q.size(); ++i) {
-		// 	if (q[i] > 0) {
-		// 		result.zRoot.push_back(z[i]);
-		// 		result.zRootsMultiplicity.push_back(q[i]);
-		// 	}
-		// }
-		// std::cout << "---------------------" << std::endl;
-		// std::cout << "Root and its multiplicity: " << std::endl;
-		// for (size_t i = 0; i < result.zRoot.size(); ++i) {
-		// 	std::cout << result.zRoot[i] << " " << result.zRootsMultiplicity[i] << std::endl;
-		// }
-		// for (size_t i = 0; i < q.size(); ++i) {
-		// 	if (q[i] < 0) {
-		// 		result.zPoles.push_back(z[i]);
-		// 		result.zPolesMultiplicity.push_back(q[i]);
-		// 	}
-		// }
-		// std::cout << "---------------------" << std::endl;
-		// std::cout << "Poles and its multiplicity: " << std::endl;
-		// for (size_t i = 0; i < result.zPoles.size(); ++i) {
-		// 	std::cout << result.zPoles[i] << " " << result.zPolesMultiplicity[i] << std::endl;
-		// }
+		std::vector<double> zRootsMultiplicity;
+		std::vector<std::complex<double>> zRoots;
+		std::vector<double> zPolesMultiplicity;
+		std::vector<std::complex<double>> zPoles;
+		// Map to eigen array
+		Eigen::Map<Eigen::ArrayXi> quadrantsEigen(quadrants.data(), quadrants.size());
+		for (const auto&region: regions) {
+			auto quadrantSequence = quadrantsEigen(region);
+			auto size_region = quadrantSequence.size();
+			Eigen::ArrayXi dQ = quadrantSequence.tail(size_region - 1) - quadrantSequence.head(size_region - 1);
+			// modify dQ element
+			for (int i = 0; i < dQ.size(); i++) {
+				if (dQ[i] == 3) dQ[i] = -1;
+				else if (dQ[i] == -3) dQ[i] = 1;
+				else if (std::abs(dQ[i]) == 2) dQ[i] = -1;
+			}
+			float qEle = dQ.sum() / 4.0;
+			auto nodesRegionReal = nodesCoord.col(0)(region);
+			auto nodesRegionImag = nodesCoord.col(1)(region);
+			Eigen::ArrayXcd nodesRegionZPlane = nodesRegionReal.cast<std::complex<double>>() + std::complex<double>(0, 1) *
+			                                    nodesRegionImag.cast<std::complex<double>>();
+			// remove duplicated z points
+			std::sort(nodesRegionZPlane.begin(), nodesRegionZPlane.end(),
+			          [](const std::complex<double>&a, const std::complex<double>&b) {
+				          if (a.real() != b.real()) {
+					          return a.real() < b.real();
+				          }
+				          return a.imag() < b.imag();
+			          });
+
+			// Find unique elements
+			std::vector<int> idxUnique{0};
+			for (int i = 1; i < nodesRegionZPlane.size(); i++) {
+				if (nodesRegionZPlane[i] != nodesRegionZPlane(i - 1)) {
+					idxUnique.push_back(i);
+				}
+			}
+			auto zEle = nodesRegionZPlane(idxUnique).mean();
+			if (qEle > 0) {
+				zRoots.push_back(zEle);
+				zRootsMultiplicity.push_back(qEle);
+			}
+			else if (qEle < 0) {
+				zPoles.push_back(zEle);
+				zPolesMultiplicity.push_back(qEle);
+			}
+
+			std::cout << "Region: --------------------------------------" << std::endl;
+			std::cout << "z = " << zEle << std::endl;
+			std::cout << "q = " << qEle << std::endl;
+		}
+
+		// save data
+		result.regions = regions;
+		result.zRoots = zRoots;
+		result.zRootsMultiplicity = zRootsMultiplicity;
+		result.zPoles = zPoles;
+		result.zPolesMultiplicity = zPolesMultiplicity;
+
+		std::cout << "---------------------" << std::endl;
+		std::cout << "Root and its multiplicity: " << std::endl;
+		for (size_t i = 0; i < result.zRoots.size(); ++i) {
+			std::cout << result.zRoots[i] << " " << result.zRootsMultiplicity[i] << std::endl;
+		}
+
+		std::cout << "---------------------" << std::endl;
+		std::cout << "Poles and its multiplicity: " << std::endl;
+		for (size_t i = 0; i < result.zPoles.size(); ++i) {
+			std::cout << result.zPoles[i] << " " << result.zPolesMultiplicity[i] << std::endl;
+		}
 		// Visualization omitted
 		return result;
 	}
