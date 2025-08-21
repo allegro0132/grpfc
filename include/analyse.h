@@ -16,6 +16,7 @@ using DirectedEdge = std::pair<CDT::VertInd, CDT::VertInd>;
 // define struct contains all parameters of the analysis
 // optional,xb,xe,yb,ye,Tol,NodesMin,NodesMax,ItMax,Mode
 struct AnalysisParams {
+	double r; // initial mesh step
 	double xb; // real part begin
 	double xe; // real part end
 	double yb; // imaginary part begin
@@ -52,7 +53,7 @@ public:
 	AnalyseRegionsResult result;
 	std::vector<std::vector<CDT::VertInd>> regions;
 
-	GRPFAnalyse(std::function<std::complex<double>(std::complex<double>)> func, const AnalysisParams& params,
+	GRPFAnalyse(std::function<std::complex<double>(std::complex<double>)> func, const AnalysisParams&params,
 	            std::string meshType = "rect");
 
 	Eigen::Index numNodes() { return nodesCoord.rows(); }
@@ -89,10 +90,10 @@ private:
 
 namespace grpfc {
 	AnalyseRegionsResult analyseRegions(
-		const Eigen::MatrixXd& nodesCoord,
-		const CDT::TriangleVec& elements,
-		std::vector<int>& quadrants,
-		const CDT::EdgeUSet& candidateEdges
+		const Eigen::MatrixXd&nodesCoord,
+		const CDT::TriangleVec&elements,
+		std::vector<int>&quadrants,
+		const CDT::EdgeUSet&candidateEdges
 	);
 }
 #endif //GRPFC_ANALYZE_H

@@ -7,7 +7,7 @@
 #include <Eigen/Dense>
 
 // Generates the initial mesh for a rectangular domain
-Eigen::MatrixXd rect_dom(double xb, double xe, double yb, double ye);
+Eigen::MatrixXd rect_dom(double xb, double xe, double yb, double ye, double r);
 
 // Generative the initial mesh for a disk domain
 Eigen::MatrixXd disk_dom(double radius, int num_points);

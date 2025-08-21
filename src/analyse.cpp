@@ -14,7 +14,7 @@
 #include "grpf.h"
 #include "utils.h"
 
-GRPFAnalyse::GRPFAnalyse(std::function<std::complex<double>(std::complex<double>)> func, const AnalysisParams& params,
+GRPFAnalyse::GRPFAnalyse(std::function<std::complex<double>(std::complex<double>)> func, const AnalysisParams&params,
                          std::string meshType) {
 	this->func = func;
 	this->params = params;
@@ -31,7 +31,7 @@ GRPFAnalyse::GRPFAnalyse(std::function<std::complex<double>(std::complex<double>
 }
 
 int GRPFAnalyse::GenerateRectangleMesh() {
-	newNodesCoord = rect_dom(params.xb, params.xe, params.yb, params.ye);
+	newNodesCoord = rect_dom(params.xb, params.xe, params.yb, params.ye, params.r);
 	return 0;
 }
 
