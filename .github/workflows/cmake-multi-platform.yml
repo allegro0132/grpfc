@@ -5,7 +5,7 @@ name: CMake on multiple platforms
 on:
   push:
     tags:
-      - "v*"
+      - "grpfc-v*"
 
 permissions:
   contents: write
@@ -97,9 +97,20 @@ jobs:
         name: library-${{ matrix.os }}-${{ matrix.cpp_compiler }}
         path: ${{ steps.strings.outputs.build-output-dir }}/libgrpfc*
 
-    - uses: "marvinpinto/action-automatic-releases@latest"
-      with:
-        repo_token: "${{ secrets.GITHUB_TOKEN }}"
-        prerelease: false
-        files: |
-          ${{ steps.strings.outputs.build-output-dir }}/libgrpfc*
+  tagged-release:
+    name: "Tagged Release"
+    runs-on: "ubuntu-latest"
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          # unpacks all CIBW artifacts into dist/
+          pattern: library-*
+          path: dist
+          merge-multiple: true
+
+      - uses: "marvinpinto/action-automatic-releases@latest"
+        with:
+          repo_token: "${{ secrets.GITHUB_TOKEN }}"
+          prerelease: false
+          files: |
+            ${{ steps.strings.outputs.build-output-dir }}/libgrpfc*
