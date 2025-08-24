@@ -1,4 +1,4 @@
-_release_version = '0.1.7'
+_release_version = '0.1.8'
 
 
 def _get_version_for_build() -> str:
