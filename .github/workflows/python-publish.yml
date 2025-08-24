@@ -48,6 +48,9 @@ jobs:
 
       - name: Build wheels with cibuildwheel
         run: |
+          find . -name "*.so" -delete
+          find . -name "*.o" -delete
+          rm -rf build/ dist/ *.egg-info
           python -m cibuildwheel --output-dir dist
         env:
           CIBW_BUILD: "cp310-* cp311-* cp312-*"
