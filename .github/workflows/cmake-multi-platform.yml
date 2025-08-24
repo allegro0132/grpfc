@@ -5,7 +5,7 @@ name: CMake on multiple platforms
 on:
   push:
     tags:
-      - "grpfc-v*"
+      - "v*"
 
 permissions:
   contents: write
@@ -112,7 +112,6 @@ jobs:
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
-          automatic_release_tag: ${{ github.ref_name }}
-          prerelease: true
+          prerelease: false
           files: |
             ${{ steps.strings.outputs.build-output-dir }}/libgrpfc*
