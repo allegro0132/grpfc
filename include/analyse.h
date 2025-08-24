@@ -53,6 +53,10 @@ public:
 	std::vector<int> quadrants;
 	AnalyseRegionsResult result;
 	std::vector<std::vector<CDT::VertInd>> regions;
+	// mode of operation (0: Self-adaptive Mesh Generator, 1: Regular Global complex Roots and Poles Finding algorithm,
+	// 2: Aborted, 3: Accuracy achieved)
+	int mode;
+	std::vector<std::complex<double>> functionValues;
 
 	GRPFAnalyse(const AnalyseParams&params,
 	            std::string meshType = "rect", bool log = false);
@@ -80,18 +84,16 @@ public:
 
 	int SplitEdge();
 
+	int PhaseAnalyse();
+
 	int AnalyseRegion();
 
 	AnalyseRegionsResult GetRootsAndPoles();
 
 private:
-	// mode of operation (0: Self-adaptive Mesh Generator, 1: Regular Global complex Roots and Poles Finding algorithm,
-	// 2: Aborted, 3: Accuracy achieved)
-	int mode;
+	bool log;
 	CDT::EdgeUSet candidateEdges;
 	CDT::EdgeUSet edgesToSplit;
-	std::vector<std::complex<double>> functionValues;
-	bool log;
 };
 
 namespace grpfc {

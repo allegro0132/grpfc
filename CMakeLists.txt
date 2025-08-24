@@ -37,7 +37,7 @@ set(src_grpfc
 )
 
 # Building Python module
-nanobind_add_module(grpfpy src/grpfpy.cpp ${src_grpfc})
+nanobind_add_module(_grpfpy src/_grpfpy.cpp ${src_grpfc})
 
 # Building shared library
 add_library(grpfc SHARED ${src_grpfc})

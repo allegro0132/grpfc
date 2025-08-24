@@ -13,7 +13,7 @@
 namespace nb = nanobind;
 using namespace nb::literals;
 
-NB_MODULE(grpfpy, m) {
+NB_MODULE(_grpfpy, m) {
 	// Binding Analysis parameters struct
 	nb::class_<AnalyseParams>(m, "AnalyseParams")
 			.def(nb::init<double, double, double, double, double, double, int, double, int>())
@@ -52,10 +52,13 @@ NB_MODULE(grpfpy, m) {
 			.def("generate_rectangle_mesh", &GRPFAnalyse::GenerateRectangleMesh)
 			.def("generate_disk_mesh", &GRPFAnalyse::GenerateDiskMesh)
 			.def("split_edge", &GRPFAnalyse::SplitEdge)
+			.def("phase_analyse", &GRPFAnalyse::PhaseAnalyse)
 			.def("evaluate_function", nb::overload_cast<const Eigen::ArrayXcd &>(&GRPFAnalyse::EvaluateFunction),
 			     "new_function_values"_a)
 			.def("evaluate_function", nb::overload_cast<>(&GRPFAnalyse::EvaluateFunction))
 			.def("analyse_region", &GRPFAnalyse::AnalyseRegion)
+			.def_rw("mode", &GRPFAnalyse::mode)
+			.def_rw("function_values", &GRPFAnalyse::functionValues)
 			.def_rw("params", &GRPFAnalyse::params)
 			.def_rw("func", &GRPFAnalyse::func)
 			.def_rw("it", &GRPFAnalyse::it)

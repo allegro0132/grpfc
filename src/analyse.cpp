@@ -126,6 +126,12 @@ int GRPFAnalyse::AdaptiveMeshGRPF() {
 	return 0;
 }
 
+int GRPFAnalyse::PhaseAnalyse() {
+	grpfc::phaseAnalyze(edges, quadrants, phasesDiff, candidateEdges);
+	return 0;
+}
+
+
 int GRPFAnalyse::SelfAdaptiveRun() {
 	while (it < params.ItMax && mode < 2) {
 		// Function evaluation
@@ -137,7 +143,7 @@ int GRPFAnalyse::SelfAdaptiveRun() {
 		// Meshing operation
 		Triangulate();
 		// Phase analysis
-		grpfc::phaseAnalyze(edges, quadrants, phasesDiff, candidateEdges);
+		PhaseAnalyse();
 		if (mode == 0) {
 			AdaptiveMeshGRPF();
 		}
