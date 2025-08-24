@@ -25,9 +25,6 @@ jobs:
         build_type: [Release]
         c_compiler: [gcc, clang, cl]
         include:
-          - os: windows-2025
-            c_compiler: cl
-            cpp_compiler: cl
           - os: ubuntu-latest
             c_compiler: gcc
             cpp_compiler: g++
@@ -94,4 +91,4 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: library-${{ matrix.os }}-${{ matrix.cpp_compiler }}
-        path: ${{ steps.strings.outputs.build-output-dir }}/lib*
+        path: ${{ steps.strings.outputs.build-output-dir }}/libgrpfc*
