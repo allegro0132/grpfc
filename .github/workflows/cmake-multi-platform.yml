@@ -114,4 +114,4 @@ jobs:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: |
-            ${{ steps.strings.outputs.build-output-dir }}/libgrpfc*
+            dist/libgrpfc*
