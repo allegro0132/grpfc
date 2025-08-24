@@ -52,9 +52,13 @@ class CMakeBuild(build_ext):
                     break
         if not so_name:
             raise RuntimeError("Could not find built cpython file")
-        # Copy .so to grpfpy/
-        shutil.copy2(so_name,
-                     os.path.join(here, 'grpfpy', os.path.basename(so_name)))
+        print(f"Found built cpython file: {so_name}")
+        # Copy .so to build/lib.../grpfpy/
+        for build_lib in os.listdir(os.path.join(here, 'build')):
+            lib_path = os.path.join(here, 'build', build_lib, 'grpfpy')
+            if os.path.isdir(lib_path):
+                shutil.copy2(so_name, os.path.join(lib_path, os.path.basename(so_name)))
+                print(f"Copied {so_name} to {lib_path}")
 
 
 setup(
