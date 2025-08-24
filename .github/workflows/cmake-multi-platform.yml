@@ -107,11 +107,11 @@ jobs:
           # unpacks all CIBW artifacts into dist/
           pattern: library-*
           path: dist
-          merge-multiple: true
+          merge-multiple: false
 
       - uses: "marvinpinto/action-automatic-releases@latest"
         with:
           repo_token: "${{ secrets.GITHUB_TOKEN }}"
           prerelease: false
           files: |
-            dist/libgrpfc*
+            dist/*
