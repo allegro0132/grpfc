@@ -1,0 +1,7 @@
+include CMakeLists.txt
+recursive-include CDT *
+recursive-include eigen *
+recursive-include src *
+recursive-include include *
+recursive-include examples *
+recursive-include unittest *
