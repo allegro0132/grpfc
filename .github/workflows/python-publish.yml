@@ -29,6 +29,7 @@ jobs:
       - name: Build release distributions
         run: |
           # NOTE: put your own distribution build steps here.
+          git submodule update --init --recursive
           python -m pip install build nanobind
           python -m build
 
