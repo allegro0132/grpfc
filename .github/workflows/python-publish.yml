@@ -59,15 +59,16 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+        with:
+            submodules: recursive
 
       - uses: actions/setup-python@v5
         with:
-          python-version: "3.x"
+          python-version: "3.10, 3.11, 3.12"
 
       - name: Build release distributions
         run: |
           # NOTE: put your own distribution build steps here.
-          git submodule update --init --recursive
           python -m pip install build nanobind
           python -m build
 
@@ -75,13 +76,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: release-dists
-          path: dist/
-
-      - name: Upload shared library
-        uses: actions/upload-artifact@v4
-        with:
-          name: library
-          path: build/*.dylib build/*.dll build/*.so
+          path: dist/*.whl
 
   pypi-publish:
     runs-on: ubuntu-latest
