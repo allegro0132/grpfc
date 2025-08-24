@@ -72,12 +72,20 @@ jobs:
           # NOTE: put your own distribution build steps here.
           python -m pip install build nanobind
           python -m build
+          cmake -B build
+          cmake --build build --config Release
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4
         with:
-          name: release-dists
+          name: release-dists-${{ matrix.os }}-${{ matrix.python-version }}
           path: dist/*.whl
+
+      - name: Upload distributions
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-library-${{ matrix.os }}-${{ matrix.cpp_compiler }}
+          path: build/lib*
 
   pypi-publish:
     runs-on: ubuntu-latest
