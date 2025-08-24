@@ -62,6 +62,15 @@ jobs:
       with:
               submodules: recursive
 
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.11"
+
+    - name: Download Python dependencies
+      run: |
+        # NOTE: put your own distribution build steps here.
+        python -m pip install nanobind
+
     - name: Set reusable strings
       # Turn repeated input strings (such as the build output directory) into step outputs. These step outputs can be used throughout the workflow file.
       id: strings
