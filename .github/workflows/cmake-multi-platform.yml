@@ -92,3 +92,10 @@ jobs:
       with:
         name: library-${{ matrix.os }}-${{ matrix.cpp_compiler }}
         path: ${{ steps.strings.outputs.build-output-dir }}/libgrpfc*
+
+    - uses: "marvinpinto/action-automatic-releases@latest"
+      with:
+        repo_token: "${{ secrets.GITHUB_TOKEN }}"
+        prerelease: false
+        files: |
+          ${{ steps.strings.outputs.build-output-dir }}/libgrpfc*
