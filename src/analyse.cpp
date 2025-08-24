@@ -14,10 +14,27 @@
 #include "grpf.h"
 #include "utils.h"
 
-GRPFAnalyse::GRPFAnalyse(std::function<std::complex<double>(std::complex<double>)> func, const AnalysisParams&params,
-                         std::string meshType) {
+GRPFAnalyse::GRPFAnalyse(const AnalyseParams&params,
+                         std::string meshType, bool log) {
+	this->params = params;
+	this->log = log;
+	// initialize parameters
+	it = 0;
+	nodesCoord = Eigen::ArrayX2d::Zero(0, 2); // Initial empty nodes coordinate array
+	// start as regular method
+	mode = 1; // 0: Adaptive, 1: Regular, 2: Aborted, 3: Accuracy achieved
+	// Generate initial mesh
+	if (meshType == "disk")
+		GenerateDiskMesh();
+	else
+		GenerateRectangleMesh();
+}
+
+GRPFAnalyse::GRPFAnalyse(std::function<std::complex<double>(std::complex<double>)> func, const AnalyseParams&params,
+                         std::string meshType, bool log) {
 	this->func = func;
 	this->params = params;
+	this->log = log;
 	// initialize parameters
 	it = 0;
 	nodesCoord = Eigen::ArrayX2d::Zero(0, 2); // Initial empty nodes coordinate array
@@ -52,7 +69,8 @@ int GRPFAnalyse::SplitEdge() {
 }
 
 int GRPFAnalyse::EvaluateFunction() {
-	std::cout << "Evaluating the function at new points: " << newNodesCoord.rows() << " nodes" << std::endl;
+	if (log)
+		std::cout << "Evaluating the function at new points: " << newNodesCoord.rows() << " nodes" << std::endl;
 	for (auto coord_in: newNodesCoord.rowwise()) {
 		auto z_in = std::complex<double>(coord_in(0), coord_in(1));
 		auto z_out = func(z_in);
@@ -62,8 +80,23 @@ int GRPFAnalyse::EvaluateFunction() {
 	return 0;
 }
 
+int GRPFAnalyse::EvaluateFunction(const Eigen::ArrayXcd&newFunctionValues) {
+	if (log)
+		std::cout << "Evaluating the function at new points: " << newNodesCoord.rows() << " nodes" << std::endl;
+	if (newFunctionValues.rows() != newNodesCoord.rows()) {
+		std::cerr << "Error: The size of newFunctionValues does not match the number of new nodes." << std::endl;
+		return -1;
+	}
+	for (Eigen::Index i = 0; i < newFunctionValues.rows(); ++i) {
+		functionValues.push_back(newFunctionValues(i));
+		quadrants.push_back(grpfc::vinq(newFunctionValues(i)));
+	}
+	return 0;
+}
+
 int GRPFAnalyse::Triangulate() {
-	std::cout << "Triangulation and analysis of: " << numNodes() << " nodes" << std::endl;
+	if (log)
+		std::cout << "Triangulation and analysis of: " << numNodes() << " nodes" << std::endl;
 	auto nodesCDT = grpfc::convertToCDTPoints(nodesCoord);
 	grpfc::triangulate(nodesCDT, elements, edges);
 	return 0;
@@ -116,18 +149,21 @@ int GRPFAnalyse::SelfAdaptiveRun() {
 		SplitEdge();
 
 		it++;
-		std::cout << "Iteration: " << it << " done" << std::endl;
-		std::cout << "----------------------------------------------------------------" << std::endl;
+		if (log) {
+			std::cout << "Iteration: " << it << " done" << std::endl;
+			std::cout << "----------------------------------------------------------------" << std::endl;
+		}
 	}
 
 	// Final analysis
-	if (mode == 2) {
-		std::cout << "Finish after: " << it << " iteration" << std::endl;
+	if (log) {
+		if (mode == 2) {
+			std::cout << "Finish after: " << it << " iteration" << std::endl;
+		}
+		else if (mode == 3) {
+			std::cout << "Assumed accuracy is achieved in iteration: " << it << std::endl;
+		}
 	}
-	else if (mode == 3) {
-		std::cout << "Assumed accuracy is achieved in iteration: " << it << std::endl;
-	}
-
 	AnalyseRegion();
 	// Get Result
 	GetRootsAndPoles();
@@ -135,7 +171,9 @@ int GRPFAnalyse::SelfAdaptiveRun() {
 }
 
 int GRPFAnalyse::AnalyseRegion() {
-	std::cout << "Evaluation of regions and verification..." << std::endl;
+	if (log) {
+		std::cout << "Evaluation of regions and verification..." << std::endl;
+	}
 	if (candidateEdges.size() == 0) {
 		std::cout << "No roots in the domain!" << std::endl;
 		return 0;
@@ -262,10 +300,11 @@ AnalyseRegionsResult GRPFAnalyse::GetRootsAndPoles() {
 			zPoles.push_back(zEle);
 			zPolesMultiplicity.push_back(qEle);
 		}
-
-		std::cout << "Region: --------------------------------------" << std::endl;
-		std::cout << "z = " << zEle << std::endl;
-		std::cout << "q = " << qEle << std::endl;
+		if (log) {
+			std::cout << "Region: --------------------------------------" << std::endl;
+			std::cout << "z = " << zEle << std::endl;
+			std::cout << "q = " << qEle << std::endl;
+		}
 	}
 
 	// save data
@@ -274,17 +313,18 @@ AnalyseRegionsResult GRPFAnalyse::GetRootsAndPoles() {
 	result.zRootsMultiplicity = zRootsMultiplicity;
 	result.zPoles = zPoles;
 	result.zPolesMultiplicity = zPolesMultiplicity;
+	if (log) {
+		std::cout << "---------------------" << std::endl;
+		std::cout << "Root and its multiplicity: " << std::endl;
+		for (size_t i = 0; i < result.zRoots.size(); ++i) {
+			std::cout << result.zRoots[i] << " " << result.zRootsMultiplicity[i] << std::endl;
+		}
 
-	std::cout << "---------------------" << std::endl;
-	std::cout << "Root and its multiplicity: " << std::endl;
-	for (size_t i = 0; i < result.zRoots.size(); ++i) {
-		std::cout << result.zRoots[i] << " " << result.zRootsMultiplicity[i] << std::endl;
-	}
-
-	std::cout << "---------------------" << std::endl;
-	std::cout << "Poles and its multiplicity: " << std::endl;
-	for (size_t i = 0; i < result.zPoles.size(); ++i) {
-		std::cout << result.zPoles[i] << " " << result.zPolesMultiplicity[i] << std::endl;
+		std::cout << "---------------------" << std::endl;
+		std::cout << "Poles and its multiplicity: " << std::endl;
+		for (size_t i = 0; i < result.zPoles.size(); ++i) {
+			std::cout << result.zPoles[i] << " " << result.zPolesMultiplicity[i] << std::endl;
+		}
 	}
 	// Visualization omitted
 	return result;

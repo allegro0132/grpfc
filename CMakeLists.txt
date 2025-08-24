@@ -1,5 +1,20 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.20...3.27)
 project(grpfc)
+
+set(DEV_MODULE Development.Module)
+
+find_package(Python 3.8 COMPONENTS Interpreter ${DEV_MODULE} REQUIRED)
+
+# set up python bind
+if (NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
+  set(CMAKE_BUILD_TYPE Release CACHE STRING "Choose the type of build." FORCE)
+  set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS "Debug" "Release" "MinSizeRel" "RelWithDebInfo")
+endif()
+# Detect the installed nanobind package and import it into CMake
+execute_process(
+    COMMAND "${Python_EXECUTABLE}" -m nanobind --cmake_dir
+    OUTPUT_STRIP_TRAILING_WHITESPACE OUTPUT_VARIABLE nanobind_ROOT)
+find_package(nanobind CONFIG REQUIRED)
 
 set(CMAKE_CXX_STANDARD 20)
 
@@ -10,7 +25,8 @@ include_directories(eigen)
 add_subdirectory(CDT/CDT CDT)
 include_directories(CDT/CDT/include)
 
-add_library(grpfc SHARED
+# Prepare library sources
+set(src_grpfc
     src/grpf.cpp
     src/meshing.cpp
     src/triangulation.cpp
@@ -18,15 +34,15 @@ add_library(grpfc SHARED
     src/cauchy.cpp
     unittest/test_init_mesh.cpp
     src/analyse.cpp
-    include/analyse.h
-    include/grpf.h
-    include/meshing.h
-    include/triangulation.h
-    include/phase.h
-    include/cauchy.h
-    include/utils.h
 )
 
+# Building Python module
+nanobind_add_module(grpfpy src/grpfpy.cpp ${src_grpfc})
+
+# Building shared library
+add_library(grpfc SHARED ${src_grpfc})
+
+# Building example
 add_executable(main src/main.cpp)
 target_link_libraries(main grpfc)
 

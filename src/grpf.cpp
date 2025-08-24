@@ -27,10 +27,10 @@ namespace grpfc {
 			auto norm = diff.norm();
 			candidateEdgesLengths.push_back(norm);
 		}
-		double minCandidateEdgesLengths = *std::min_element(candidateEdgesLengths.begin(), candidateEdgesLengths.end());
+		// double minCandidateEdgesLengths = *std::min_element(candidateEdgesLengths.begin(), candidateEdgesLengths.end());
 		double maxCandidateEdgesLengths = *std::max_element(candidateEdgesLengths.begin(), candidateEdgesLengths.end());
-		std::cout << "Candidate edges length min: " << minCandidateEdgesLengths
-				<< " max: " << maxCandidateEdgesLengths << std::endl;
+		// std::cout << "Candidate edges length min: " << minCandidateEdgesLengths
+		// 		<< " max: " << maxCandidateEdgesLengths << std::endl;
 		if (maxCandidateEdgesLengths < tol) {
 			mode = 3;
 		}

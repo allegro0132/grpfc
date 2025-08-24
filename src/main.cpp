@@ -13,7 +13,7 @@ int main() {
 	// Initialization parameters
 	int ItMax = 100; // Example value, set as needed
 	int NodesMin = 0; // Example value
-	int NodesMax = INFINITY; // Example value
+	double NodesMax = INFINITY; // Example value
 	double Tol = 1e-6; // Example value
 	double r = 0.5; // Initial mesh step
 	double xb = -2.0;
@@ -24,10 +24,10 @@ int main() {
 	double epsilon = 0.0;
 
 	// set up the analysis parameters
-	AnalysisParams params{r, xb, xe, yb, ye, Tol, NodesMin, NodesMax, ItMax};
+	AnalyseParams params{r, xb, xe, yb, ye, Tol, NodesMin, NodesMax, ItMax};
 
 	// initialize the variables
-	GRPFAnalyse grpf(func, params);
+	GRPFAnalyse grpf(func, params, "rect", false);
 	grpf.SelfAdaptiveRun();
 	// Get results
 	auto res = grpf.result;

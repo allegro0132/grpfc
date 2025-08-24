@@ -15,7 +15,7 @@ using DirectedEdge = std::pair<CDT::VertInd, CDT::VertInd>;
 
 // define struct contains all parameters of the analysis
 // optional,xb,xe,yb,ye,Tol,NodesMin,NodesMax,ItMax,Mode
-struct AnalysisParams {
+struct AnalyseParams {
 	double r; // initial mesh step
 	double xb; // real part begin
 	double xe; // real part end
@@ -27,7 +27,7 @@ struct AnalysisParams {
 	int NodesMin; // minimum number of nodes
 	// the number of points after that the regular mode is automatically switched (without interrupt possibilities)
 	// set Inf if you want to manually choose the mode after each iteration
-	int NodesMax; // maximum number of nodes
+	double NodesMax; // maximum number of nodes
 	// Maximum number of iterations (buffer)
 	int ItMax; // maximum number of iterations
 };
@@ -42,10 +42,11 @@ struct AnalyseRegionsResult {
 
 class GRPFAnalyse {
 public:
-	AnalysisParams params;
+	AnalyseParams params;
 	std::function<std::complex<double>(std::complex<double>)> func;
 	int it;
 	Eigen::ArrayX2d nodesCoord; // Initial empty nodes coordinate array
+	Eigen::ArrayX2d newNodesCoord; // New nodes to be added at each iteration
 	CDT::TriangleVec elements;
 	CDT::EdgeUSet edges;
 	std::vector<int> phasesDiff;
@@ -53,8 +54,11 @@ public:
 	AnalyseRegionsResult result;
 	std::vector<std::vector<CDT::VertInd>> regions;
 
-	GRPFAnalyse(std::function<std::complex<double>(std::complex<double>)> func, const AnalysisParams&params,
-	            std::string meshType = "rect");
+	GRPFAnalyse(const AnalyseParams&params,
+	            std::string meshType = "rect", bool log = false);
+
+	GRPFAnalyse(std::function<std::complex<double>(std::complex<double>)> func, const AnalyseParams&params,
+	            std::string meshType = "rect", bool log = false);
 
 	Eigen::Index numNodes() { return nodesCoord.rows(); }
 
@@ -65,6 +69,8 @@ public:
 	int SelfAdaptiveRun();
 
 	int EvaluateFunction();
+
+	int EvaluateFunction(const Eigen::ArrayXcd&newFunctionValues);
 
 	int RegularGRPF();
 
@@ -85,7 +91,7 @@ private:
 	CDT::EdgeUSet candidateEdges;
 	CDT::EdgeUSet edgesToSplit;
 	std::vector<std::complex<double>> functionValues;
-	Eigen::ArrayX2d newNodesCoord;
+	bool log;
 };
 
 namespace grpfc {
