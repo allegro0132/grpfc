@@ -62,19 +62,12 @@ jobs:
         with:
             submodules: recursive
 
-      - uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install cibuildwheel
-        run: python -m pip install cibuildwheel nanobind
-
       - name: Build wheels with cibuildwheel
-        run: |
-          python -m cibuildwheel --output-dir dist
+        uses: pypa/cibuildwheel@v3.1.4
         env:
+          CIBW_REQUIRES: cibuildwheel nanobind
           CIBW_SKIP: "pp*"
-          CIBW_BUILD: "cp311-*"
+          CIBW_BUILD: cp311-* cp312-* cp313-*
 
       - name: Upload distributions
         uses: actions/upload-artifact@v4
