@@ -48,6 +48,8 @@ GRPFAnalyse::GRPFAnalyse(std::function<std::complex<double>(std::complex<double>
 }
 
 int GRPFAnalyse::GenerateRectangleMesh() {
+	// assert params
+	assert(params.xb < params.xe && params.yb < params.ye && params.r > 0);
 	newNodesCoord = rect_dom(params.xb, params.xe, params.yb, params.ye, params.r);
 	return 0;
 }
@@ -104,6 +106,7 @@ int GRPFAnalyse::Triangulate() {
 
 int GRPFAnalyse::RegularGRPF() {
 	// Regular Global complex Roots and Poles Finding algorithm
+	assert(params.Tol > 0);
 	edgesToSplit = grpfc::regularGRPF(nodesCoord, params.Tol, elements, candidateEdges, mode);
 	return 0;
 }
@@ -133,6 +136,7 @@ int GRPFAnalyse::PhaseAnalyse() {
 
 
 int GRPFAnalyse::SelfAdaptiveRun() {
+	assert(params.ItMax > 0);
 	while (it < params.ItMax && mode < 2) {
 		// Function evaluation
 		EvaluateFunction();

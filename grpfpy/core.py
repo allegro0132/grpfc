@@ -51,7 +51,9 @@ class GRPFAnalyse:
     def self_adaptive_run(self):
         while self._self.it < self._self.params.it_max and self._self.mode < 2:
             # Function evaluation
-            new_function_values = self.func(self._self.new_nodes_coord)
+            new_z = (self._self.new_nodes_coord[:, 0] +
+                     self._self.new_nodes_coord[:, 1] * 1j)
+            new_function_values = self.func(new_z)
             self._self.evaluate_function(new_function_values)
             # Concat NodesCoord
             self._self.nodes_coord = np.vstack(
@@ -90,8 +92,6 @@ class GRPFAnalyse:
 if __name__ == "__main__":
 
     def complex_fun(z):
-        z = np.asarray(z)
-        z = z[:, 0] + z[:, 1] * 1j
         return (z - 1) * (z + 1) / (z + 1j)
 
     params = AnalyseParams(0.5, -2.0, 2.0, -2.0, 2.0, 1e-6, 0, float('inf'),
