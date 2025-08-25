@@ -29,7 +29,7 @@ jobs:
           python-version: "3.12"
 
       - name: Install build dependencies
-        run: python -m pip install setuptools wheel nanobind
+        run: python -m pip install setuptools wheel nanobind build
 
       - name: Build source distribution
         run: python -m build --sdist

@@ -9,6 +9,17 @@ The GRPF algorithm first samples the function on a triangular mesh through Delau
 Candidate regions to search for roots and poles are determined and the discretized [Cauchy's argument principle](https://en.wikipedia.org/wiki/Argument_principle) is applied _without needing the derivative of the function or integration over the contour_.
 To improve the accuracy of the results, a self-adaptive mesh refinement occurs inside the identified candidate regions.
 
+## grpfpy: Global complex Roots and Poles Finding binding in Python
+
+We also provide `grpfpy`, a Python binding for `grpfc`, which is a convenient and high-performance solution for your research. A set of pre-compiled wheels could be installed directly via
+```bash
+  pip install grpfpy
+```
+Additionally, if your platform has not been supported, you can clone the sources and build them yourself using pip or cmake:
+```bash
+  pip install .
+```
+
 ## Installation
 - Pull source codes
 ```bash
@@ -32,7 +43,7 @@ To improve the accuracy of the results, a self-adaptive mesh refinement occurs i
 
 - Prepare building directory
 ```bash
-  mkdir build&&cd build 
+  mkdir build&&cd build
 ```
 
 - Prepare compile flags using cmake

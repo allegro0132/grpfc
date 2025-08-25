@@ -82,13 +82,15 @@ jobs:
 
     - name: Build
       # Build your program with the given configuration. Note that --config is needed because the default Windows generator is a multi-config generator (Visual Studio generator).
-      run: cmake --build build --config ${{ matrix.build_type }}
+      run: |
+        cmake --build build --config ${{ matrix.build_type }}
+        tar -zcvf build/libgrpfc-${{ matrix.os }}-${{ matrix.cpp_compiler }}.tar.gz -C build libgrpfc*
 
     - name: Upload distributions
       uses: actions/upload-artifact@v4
       with:
         name: library-${{ matrix.os }}-${{ matrix.cpp_compiler }}
-        path: build/libgrpfc*
+        path: build/*tar.gz
 
   tagged-release:
     name: "Tagged Release"
