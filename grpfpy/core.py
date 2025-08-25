@@ -1,14 +1,12 @@
 import numpy as np
-from . import _grpfpy
-
-AnalyseParams = _grpfpy.AnalyseParams
-AnalyseRegionsResult = _grpfpy.AnalyseRegionsResult
+from grpfpy._grpfpy import AnalyseParams, AnalyseRegionsResult
+from grpfpy._grpfpy import GRPFAnalyse as _GRPFAnalyse
 
 
 class GRPFAnalyse:
 
     def __init__(self, func, params, mesh_type, log):
-        self._self = _grpfpy.GRPFAnalyse(params, mesh_type, log)
+        self._self = _GRPFAnalyse(params, mesh_type, log)
         self.func = func
         self.log = log
         self._self.mode = 1
